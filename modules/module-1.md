@@ -1,3 +1,5 @@
+# Node.js
+
 <details>
   <summary>Module 1</summary>
 <ul>
@@ -1295,6 +1297,912 @@ console.log(`Server is running on port ${PORT}`); </br>
 
 </details>
 </li>
+</ul>
+</details>
 
+<details>
+  <summary>Module 2</summary>
+<ul>
+    <li>
+    <details>
+    <summary>MongoDB Atlas</summary>
+
+# MongoDB Atlas
+
+Уявіть собі величезний склад, де зберігаються всі ваші дані. Так працює база даних MongoDB: вона зберігає інформацію у вигляді документів, які виглядають як JavaScript-об’єкти.
+
+<em>
+  { </br>
+  "id": 1, </br>
+  "name": "Alice", </br>
+  "email": "alice@mail.com" </br>
+  } </br>
+</em>
+</br>
+MongoDB можна встановити локально на комп’ютер, але набагато зручніше користуватися її хмарною версією.
+
+<strong>MongoDB Atlas</strong> — це сервіс, який дозволяє створити та використовувати базу даних у хмарі. Вам не потрібно налаштовувати сервери вручну — достатньо зареєструватися, і ви отримаєте готовий кластер.
+
+Кластер — це група серверів, які працюють разом, щоб:
+
+- база даних завжди була доступною,
+- дані не зникли при збої,
+- запити виконувались швидко навіть під великим навантаженням.
+
+Тобто, якщо звичайна база — це просто склад, то кластер у
+
+MongoDB Atlas — це склад із додатковими "охоронцями", резервними копіями та можливістю швидко збільшувати площу, якщо з’являється більше товару (даних).
+
+## Створення акаунту
+
+Щоб почати роботу:
+
+- Переходимо на MongoDB Atlas.
+- Реєструємо акаунт.
+- Створюємо кластер (це буде наша база в хмарі).
+
+## Збереження даних підключення
+
+Після створення бази ви отримаєте спеціальний connection string — рядок підключення. Наприклад:
+
+<em>mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0</em>
+
+У код його додавати не можна — це небезпечно. Натомість ми збережемо ці дані у файлі .env, щоб зручно працювати з різними середовищами (локально, на тесті, у продакшені).
+
+#.env
+
+<em>
+  PORT=3000 </br>
+  MONGO_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true& w=majority&appName=Cluster0 </br>
+</em>
+</br>
+І не забудьте оновити файл .env.example, щоб інші розробники бачили, які змінні треба налаштувати:
+
+#.env.example
+
+<em>
+  PORT= </br>
+  MONGO_URL=
+</em>
+
+## Підключення MongoDB
+
+Щоб працювати з базою даних, нам потрібно підключитися до неї зі свого бекенду. Робити це "вручну" через драйвер MongoDB незручно, тому ми використаємо бібліотеку Mongoose.
+
+Mongoose спрощує роботу з базою:
+
+- дозволяє легко підключитися,
+- працювати з колекціями як з об’єктами,
+- будувати схеми та моделі для даних.
+
+Встановлюємо пакет у наш проєкт:
+
+- <em>npm install mongoose</em>
+
+Файл для підключення
+
+Щоб код був структурованим, створимо у папці src нову папку db, а в ній файл connectMongoDB.js. Там ми напишемо функцію для підключення до бази даних.
+
+<em>
+ <details>
+    <summary>
+      // src/db/connectMongoDB.js</br>
+      import mongoose from 'mongoose';</br>
+      </br>
+      export const connectMongoDB = async () => {</br>
+    </summary>
+    try {</br>
+    const mongoUrl = process.env.MONGO_URL;</br>
+    await mongoose.connect(mongoUrl);</br>
+    console.log('✅ MongoDB connection established successfully');</br>
+    } catch (error) {</br>
+    console.error('❌ Failed to connect to MongoDB:', error.message);</br>
+    process.exit(1); // аварійне завершення програми</br>
+    }</br>
+    };</br>
+ </details>
+</em>
+</br>
+Тут ми:
+
+- читаємо рядок підключення (MONGO_URL) зі змінних оточення,
+- викликаємо mongoose.connect(...) для встановлення з’єднання,
+- у разі успіху виводимо повідомлення,
+- у разі помилки завершуємо роботу процесу (process.exit(1)), щоб сервер не залишався "напівживим".
+
+Виклик у сервері
+
+У файлі src/server.js імпортуємо та викликаємо функцію перед запуском сервера:
+
+<em>
+  <details>
+   <summary>
+      // src/server.js</br>
+      </br>
+      import express from 'express';</br>
+      import 'dotenv/config';</br>
+   </summary>
+    import cors from 'cors';</br>
+    import { connectMongoDB } from './db/connectMongoDB.js';</br>
+    </br>
+    const app = express();</br>
+    const PORT = process.env.PORT ?? 3030;</br>
+    </br>
+    /_ Middleware та маршрути _/</br>
+    </br>
+    // підключення до MongoDB</br>
+    await connectMongoDB();</br>
+    </br>
+    // запуск сервера</br>
+    app.listen(PORT, () => {</br>
+    console.log(`Server is running on port ${PORT}`);</br>
+    });</br>
+  </details>
+</em>
+</br>
+У сучасному Node.js ми можемо використовувати top-level await. Це означає, що await можна викликати прямо у файлі модуля, а не тільки всередині async функції. Це зручно, бо дозволяє писати асинхронний код на верхньому рівні програми.
+
+  </details>
+</li>
+<li>
+<details>
+<summary>MongoDB Compass</summary>
+
+# Імпорт даних у MongoDB
+
+Працювати з базою даних можна різними способами: через командний рядок, напряму з коду або за допомогою зручних інструментів з графічним інтерфейсом. Для початку ми використаємо MongoDB Compass — офіційний інструмент зручної роботи з MongoDB.
+
+MongoDB Compass — це програма, яка дозволяє переглядати базу даних у зрозумілому віконному інтерфейсі. Вона значно полегшує роботу:
+
+- можна переглядати колекції та документи,
+- редагувати записи,
+- виконувати пошук і фільтрацію,
+- імпортувати та експортувати дані.
+
+Це хороший старт, бо дає можливість швидко ознайомитися з тим, як виглядають дані у базі.
+
+При завантаженні обирайте саме <strong>MongoDB Compass Download (GUI)</strong> — це потрібна нам версія.
+
+Імпорт тестових даних
+
+Щоб мати з чим працювати далі на практиці, ми одразу додамо у базу даних тестову колекцію студентів. Для цього:
+
+1. Завантажте файл із даними:
+
+students.json
+
+2. Використайте функцію імпорту в Compass, щоб додати ці дані у нову базу даних Students.
+
+Після імпорту у вас з’явиться готова колекція студентів, яку ми будемо використовувати для навчання: шукати, змінювати, видаляти та додавати нові записи.
+
+Підключення до конкретної бази даних
+
+У MongoDB Atlas ми можемо працювати з багатьма базами даних в одному кластері. Але для нашого проєкту важливо, щоб сервер одразу підключався саме до тієї бази, з якою ми працюємо.
+
+Ми вже створили базу даних students, тому потрібно вказати її назву у змінній оточення. Для цього після mongodb.net/ у connection string додаємо назву бази (students) перед параметрами ?retry....
+
+Файл .env тепер виглядає так:
+
+<em>
+  #.env </br>
+ </br>
+  PORT=3000 </br>
+  MONGODB_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/students?retryWrites=true&w=majority&appName=Cluster0 </br>
+</em>
+</br>
+Тепер при підключенні через Mongoose ми одразу працюємо з базою students. Це означає, що всі наші моделі та колекції будуть створюватися й зберігатися саме в цій базі.
+
+Mongoose читає повний рядок підключення з process.env.MONGODB_URL, тому код підключення в connectMongoDB лишається без змін.
+
+</details>
+</li>
+
+<li>
+<details>
+<summary>Модель даних</summary>
+
+# Модель даних
+
+У цьому модулі ми будемо створювати бекенд для адмін-панелі навчального закладу, де ведеться облік студентів. Тому нашою першою моделлю буде студент.
+
+MongoDB — це документоорієнтована NoSQL база даних, яка зберігає дані у вигляді документів у форматі BSON (Binary JSON). Модель даних у MongoDB базується на колекціях і документах.
+
+Основні поняття MongoDB
+
+- Колекція (Collection): група документів. Можна уявити як масив об’єктів.
+- Документ (Document): основна одиниця даних. Це JSON-подібний об’єкт у форматі BSON.
+- Поле (Field): пара «ключ-значення» всередині документа.
+- Ідентифікатор (\_id): унікальне поле, яке автоматично створюється для кожного документа.
+
+Основні поняття Mongoose
+
+Щоб працювати з MongoDB, ми будемо використовувати бібліотеку <strong>Mongoose</strong>, яка спрощує опис структури документів. У ній є кілька ключових понять:
+
+- Схема (Schema): описує структуру документа (які поля і з якими типами будуть).
+- Модель (Model): клас, створений на основі схеми. Використовується для роботи з колекцією.
+- Документ (Document): конкретний екземпляр моделі, який відповідає запису в базі даних.
+
+Схема студента
+
+Створимо схему для документа студента. Для цього використаємо клас Schema з бібліотеки mongoose.
+
+<em>
+ <details>
+   <summary>
+      // src/models/student.js </br>
+       </br>
+      import { Schema } from 'mongoose'; </br>
+       </br>
+      const studentSchema = new Schema( </br>
+   </summary>
+    { </br>
+    name: { </br>
+    type: String, </br>
+    required: true, </br>
+    trim: true, // прибирає пробіли на початку та в кінці </br>
+    }, </br>
+    age: { </br>
+    type: Number, </br>
+    required: true, </br>
+    }, </br>
+    gender: { </br>
+    type: String, </br>
+    required: true, </br>
+    enum: ['male', 'female', 'other'], </br>
+    }, </br>
+    avgMark: { </br>
+    type: Number, </br>
+    required: true, </br>
+    }, </br>
+    onDuty: { </br>
+    type: Boolean, </br>
+    default: false, </br>
+    }, </br>
+    }, </br>
+    { </br>
+    timestamps: true, </br>
+    versionKey: false, </br>
+    }, </br>
+    ); </br>
+ </details>
+</em>
+ </br>
+Пояснення
+
+- type — тип даних (String, Number, Boolean).
+- required — чи поле обов’язкове.
+- trim: true — автоматично видаляє зайві пробіли на початку та в кінці рядка. Корисно для текстових полів, - таких як name, щоб уникнути збереження значень на кшталт " John ".
+- enum — перелік допустимих значень (наприклад, для gender).
+- default — значення за замовчуванням, якщо поле не передано.
+- timestamps — автоматично додає createdAt і updatedAt.
+- versionKey: false — вимикає службове поле \_\_v.
+
+Модель студента
+
+Створимо модель Student на основі нашої схеми:
+
+<em>
+  // src/models/student.js </br>
+   </br>
+  import { model } from 'mongoose'; </br>
+   </br>
+  /_ Решта коду файла _/ </br>
+   </br>
+  export const Student = model('Student', studentSchema); </br>
+</em>
+</br>
+Mongoose автоматично створить колекцію students у базі даних (назва береться у множині). Тепер ми можемо використовувати модель Student для взаємодії з колекцією: створювати нових студентів, отримувати список, оновлювати чи видаляти записи.
+
+</details></li>
+<li>
+<details>
+<summary>Взаємодія з базою даних</summary>
+
+# Взаємодія з базою даних
+
+Тепер, коли ми вже маємо базу students та модель Student, додамо маршрути для взаємодії з нею. Почнемо з отримання всіх студентів та отримання одного студента за його id.
+
+## Маршрут: отримати всіх студентів
+
+У цьому маршруті ми будемо звертатися до колекції students через вбудований метод Mongoose <strong>Student.find()</strong>, який повертає масив документів (може бути порожнім), що відповідають моделі Student.
+
+<em>
+ <details>
+   <summary>
+      // src/server.js </br>
+       </br>
+      import { Student } from './models/student.js'; </br>
+      // Код імпортів та підключення middleware бібліотек </br>
+   </summary>
+     </br>
+    app.get('/students', async (req, res) => { </br>
+    const students = await Student.find(); </br>
+    res.status(200).json(students); </br>
+    }); </br>
+     </br>
+    // Код 404 та error middleware, підключення до бази даних та старт сервера </br>
+ </details>
+</em>
+ </br>
+
+## Маршрут: отримати одного студента за id
+
+Для цього маршруту ми використаємо вбудований метод Mongoose <strong>Student.findById()</strong>. Якщо документ із заданим ідентифікатором не буде знайдено, метод поверне null. У такому випадку ми повернемо статус 404.
+
+<em>
+ <details>
+  <summary>
+      // src/server.js </br>
+       </br>
+      // Решта коду </br>
+       </br>
+  </summary>
+    app.get('/students/:studentId', async (req, res) => { </br>
+    const { studentId } = req.params; </br>
+    const student = await Student.findById(studentId); </br>
+     </br>
+    if (!student) { </br>
+    return res.status(404).json({ message: 'Student not found' }); </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }); </br>
+     </br>
+    // Решта коду </br>
+ </details>
+</em>
+</br>
+Властивість <strong>params</strong> на об’єкті запиту <strong>req</strong> містить динамічні параметри маршруту. Кожне ім’я параметра відповідає властивості цього об’єкта, а значення, передане в URL, стає значенням цієї властивості.
+
+Повний код із підключенням middleware
+
+<em>
+<details>
+  <summary>
+      // src/server.js </br>
+       </br>
+      import express from 'express'; </br>
+      import 'dotenv/config'; </br>
+      import cors from 'cors'; </br>
+  </summary>
+    import { connectMongoDB } from './db/connectMongoDB.js'; </br>
+    import { Student } from './models/student.js'; </br>
+     </br>
+    const app = express(); </br>
+    const PORT = process.env.PORT ?? 3000; </br>
+     </br>
+    app.use(express.json()); </br>
+    app.use(cors()); </br>
+     </br>
+    // GET /students — список усіх студентів </br>
+    app.get('/students', async (req, res) => { </br>
+    const students = await Student.find(); </br>
+    res.status(200).json(students); </br>
+    }); </br>
+     </br>
+    // GET /students/:studentId — один студент за id </br>
+    app.get('/students/:studentId', async (req, res) => { </br>
+    const { studentId } = req.params; </br>
+    const student = await Student.findById(studentId); </br>
+    if (!student) { </br>
+    return res.status(404).json({ message: 'Student not found' }); </br>
+    } </br>
+    res.status(200).json(student); </br>
+    }); </br>
+     </br>
+    // Middleware 404 </br>
+    app.use((req, res) => { </br>
+    res.status(404).json({ message: 'Route not found' }); </br>
+    }); </br>
+     </br>
+    // Middleware для обробки помилок </br>
+    app.use((err, req, res, next) => { </br>
+    console.error(err); </br>
+     </br>
+    const isProd = process.env.NODE_ENV === "production"; </br>
+     </br>
+    res.status(500).json({ </br>
+    message: isProd </br>
+    ? "Something went wrong. Please try again later." </br>
+    : err.message, </br>
+    }); </br>
+    }); </br>
+     </br>
+    await connectMongoDB(); </br>
+     </br>
+    app.listen(PORT, () => { </br>
+    console.log(`Server is running on port ${PORT}`); </br>
+    }); </br>
+</details>
+</em>
+ </br>
+Тепер ми маємо:
+
+- GET <http://localhost:3000/students> → повертає всіх студентів.
+- GET <http://localhost:3000/students/:studentId> → повертає одного студента або 404, якщо такого немає.
+
+</details>
+</li>
+
+<li>
+<details>
+<summary>Організація middleware</summary>
+
+# Організація middleware
+
+Коли наш код зростає, важливо зберігати його структурованим і зрозумілим. Якщо всі middleware та маршрути будуть в одному файлі server.js, швидко виникне плутанина. Тому ми виносимо middleware в окремі файли. Це дає кілька переваг:
+
+- легше читати код, бо кожен файл відповідає за одну конкретну задачу;
+- простіше підтримувати — якщо треба змінити тільки логування або обробку помилок, ми працюємо з окремим файлом;
+- масштабованість — у майбутньому легко додати нові middleware без засмічення server.js.
+
+## Структура проєкту
+
+Створюємо в папці src нову папку middleware і кладемо туди наші кастомні middleware.
+
+src/ </br>
+--middleware/ </br>
+----errorHandler.js </br>
+----notFoundHandler.js </br>
+----logger.js </br>
+--server.js </br>
+</br>
+
+## Error middleware
+
+Перенесемо middleware для обробки помилок у файл <strong>errorHandler.js</strong>.
+
+<em>
+<details>
+   <summary>
+      // src/middleware/errorHandler.js </br>
+       </br>
+      app.use((err, req, res, next) => { </br>
+      console.error(err); </br>
+   </summary>
+     </br>
+    const isProd = process.env.NODE_ENV === "production"; </br>
+     </br>
+    res.status(500).json({ </br>
+    message: isProd </br>
+    ? "Something went wrong. Please try again later." </br>
+    : err.message, </br>
+    }); </br>
+    }); </br>
+</details>
+</em>
+ </br>
+Це middleware має 4 аргументи (err, req, res, next) — саме за цим Express розуміє, що воно призначене для помилок.
+Використовується завжди останнім, щоб перехопити всі помилки з попередніх обробників.
+Ми виводимо помилку в консоль і повертаємо клієнту відповідь зі статусом 500 Internal Server Error.
+
+## 404 middleware
+
+Тепер винесемо обробку випадку, коли клієнт звертається до неіснуючого маршруту. Для цього створимо <strong>notFoundHandler.js</strong>.
+
+<em>
+  // src/middleware/notFoundHandler.js </br>
+   </br>
+  export const notFoundHandler = (req, res) => { </br>
+  res.status(404).json({ message: 'Route not found' }); </br>
+  }; </br>
+</em>
+ </br>
+Це middleware підключається після всіх маршрутів.
+Якщо жоден маршрут не збігся, керування потрапить сюди.
+Ми відправляємо клієнту відповідь зі статусом 404 Not Found.
+
+## Логер Pino
+
+Щоб бачити всі запити, підключимо pino-http у <strong>logger.js</strong>.
+
+<em>
+ <details>
+   <summary>
+      // src/middleware/logger.js </br>
+       </br>
+      import pino from 'pino-http'; </br>
+       </br>
+      export const logger = pino({ </br>
+   </summary>
+    level: 'info', </br>
+    transport: { </br>
+    target: 'pino-pretty', </br>
+    options: { </br>
+    colorize: true, </br>
+    translateTime: 'HH:MM:ss', </br>
+    ignore: 'pid,hostname', </br>
+    messageFormat: '{req.method} {req.url} {res.statusCode} - {responseTime}ms', </br>
+    hideObject: true, </br>
+    }, </br>
+    }, </br>
+    }); </br>
+ </details>
+</em>
+ </br>
+Логер дозволяє відстежувати всі запити до сервера: метод (GET, POST), шлях, статус відповіді, час виконання.
+Ми використовуємо pino-pretty, щоб логи в консолі були кольоровими та зручними для читання.
+Логер треба підключати одним із перших middleware, щоб він бачив усі запити та помилки.
+
+## Підключення в сервері
+
+Тепер у <strong>server.js</strong> імпортуємо всі ці middleware та використовуємо їх у правильному порядку.
+
+<em>
+  <details>
+  <summary>
+      // src/server.js </br>
+      import express from 'express'; </br>
+      import 'dotenv/config'; </br>
+      import cors from 'cors'; </br>
+  </summary>
+     </br>
+    import { connectMongoDB } from './db/connectMongoDB.js'; </br>
+    import { logger } from './middleware/logger.js'; </br>
+    import { notFoundHandler } from './middleware/notFoundHandler.js'; </br>
+    import { errorHandler } from './middleware/errorHandler.js'; </br>
+     </br>
+    const app = express(); </br>
+    const PORT = process.env.PORT ?? 3000; </br>
+     </br>
+    // Глобальні middleware </br>
+    app.use(logger); // 1. Логер першим — бачить усі запити </br>
+    app.use(express.json()); // 2. Парсинг JSON-тіла </br>
+    app.use(cors()); // 3. Дозвіл для запитів з інших доменів </br>
+     </br>
+    // ...тут ваші маршрути </br>
+     </br>
+    // 404 — якщо маршрут не знайдено </br>
+    app.use(notFoundHandler); </br>
+     </br>
+    // Error — якщо під час запиту виникла помилка </br>
+    app.use(errorHandler); </br>
+     </br>
+    await connectMongoDB(); </br>
+     </br>
+    app.listen(PORT, () => { </br>
+    console.log(`Server is running on port ${PORT}`); </br>
+    }); </br>
+  </details>
+</em>
+ </br>
+Чому порядок важливий?
+
+1. Logger першим → логуються всі вхідні запити.
+2. JSON і CORS далі → кожен запит обробляється перед передачею в маршрути.
+3. Маршрути → відповідають на конкретні запити.
+4. 404 handler → якщо маршрут не знайдено.
+5. Error handler → якщо трапилась помилка на будь-якому етапі.
+</details>
+</li>
+<li>
+<details>
+<summary>Організація роутингу</summary>
+
+# Організація роутингу
+
+До цього ми писали обробники запитів безпосередньо у файлі server.js. Якщо маршрутів стає більше, зручніше винести їх у окремі файли й групувати за доменами (наприклад, students, auth, courses). Для цього є <strong>Express Router</strong> — об'єкт, який дозволяє групувати маршрути та їх обробники у логічні блоки.
+
+Створюємо роутер для студентів
+
+Створіть файл src/routes/studentsRoutes.js. Тут оголошуємо роутер і одразу експортуємо його. Це «порожня рамка», у яку додамо маршрути.
+
+<em>
+  // src/routes/studentsRoutes.js </br>
+   </br>
+  import { Router } from 'express'; </br>
+   </br>
+  const router = Router(); </br>
+   </br>
+  export default router; </br>
+</em>
+ </br>
+Переносимо обробники у роутер
+
+Далі переносимо контролери, які обробляють маршрути /students та /students/:studentId із файла server.js у файл роутингу studentsRoutes.js. Для їх оголошення замість app використовуємо створений router.
+
+<em>
+ <details>
+  <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { Student } from '../models/student.js'; </br>
+  </summary>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get('/students', async (req, res) => { </br>
+    const students = await Student.find(); </br>
+    res.status(200).json(students); </br>
+    }); </br>
+     </br>
+    router.get('/students/:studentId', async (req, res) => { </br>
+    const { studentId } = req.params; </br>
+    const student = await Student.findById(studentId); </br>
+    if (!student) { </br>
+    return res.status(404).json({ message: 'Student not found' }); </br>
+    } </br>
+    res.status(200).json(student); </br>
+    }); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+ </br>
+Підключаємо роутер
+
+Тепер імпортуємо створений роутер у файл server.js та додаємо його як middleware до app, за допомогою методу app.use().
+
+<em>
+<details>
+    <summary>
+      // src/server.js </br>
+       </br>
+      import express from 'express'; </br>
+      import 'dotenv/config'; </br>
+      import cors from 'cors'; </br>
+    </summary>
+     </br>
+    import { connectMongoDB } from './db/connectMongoDB.js'; </br>
+    import { logger } from './middleware/logger.js'; </br>
+    import { notFoundHandler } from './middleware/notFoundHandler.js'; </br>
+    import { errorHandler } from './middleware/errorHandler.js'; </br>
+     </br>
+    import studentsRoutes from './routes/studentsRoutes.js'; </br>
+     </br>
+    const app = express(); </br>
+    const PORT = process.env.PORT ?? 3000; </br>
+     </br>
+    // глобальні middleware </br>
+    app.use(logger); </br>
+    app.use(express.json()); </br>
+    app.use(cors()); </br>
+     </br>
+    // підключаємо групу маршрутів студента </br>
+    app.use(studentsRoutes); </br>
+     </br>
+    // 404 і обробник помилок — наприкінці ланцюжка </br>
+    app.use(notFoundHandler); </br>
+    app.use(errorHandler); </br>
+     </br>
+    await connectMongoDB(); </br>
+     </br>
+    app.listen(PORT, () => { </br>
+    console.log(`Server is running on port ${PORT}`); </br>
+    }); </br>
+</details>
+</em>
+ </br>
+Підсумок
+
+Така організація коду створює зрозумілу структуру проєкту:
+
+- server.js відповідає за складання застосунку та запуск сервера;
+- роутери містять логіку для роботи з конкретними сутностями (у нашому випадку — студентами);
+- моделі визначають доступ до бази даних.
+- Цей підхід робить код більш чистим, масштабованим і зручним у підтримці.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Організація контролерів</summary>
+
+# Організація контролерів
+
+Ми вже винесли маршрути в окремий файл, але в ньому все ще залишилася логіка обробки запитів. Якщо маршрути будуть складнішими, код швидко стане важким для читання. Щоб уникнути цього, створимо окремий шар контролерів.
+
+<strong>Контролери</strong> — це функції, які відповідають за обробку запитів і формування відповіді. Роутер лише «знає», який контролер викликати для конкретного маршруту, а саму логіку ми зберігаємо в іншому місці. Це робить код більш організованим і зрозумілим.
+
+## Створюємо контролери
+
+Створіть папку src/controllers, а в ній файл studentsController.js. У цей файл винесемо контролери, які зараз знаходяться у файлі studentsRoutes.js.
+
+<em>
+ <details>
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      import { Student } from '../models/student.js'; </br>
+       </br>
+      // Отримати список усіх студентів </br>
+   </summary>
+    export const getStudents = async (req, res) => { </br>
+    const students = await Student.find(); </br>
+    res.status(200).json(students); </br>
+    }; </br>
+     </br>
+    // Отримати одного студента за id </br>
+    export const getStudentById = async (req, res) => { </br>
+    const { studentId } = req.params; </br>
+    const student = await Student.findById(studentId); </br>
+     </br>
+    if (!student) { </br>
+    return res.status(404).json({ message: 'Student not found' }); </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+
+## Використовуємо контролери у роутері
+
+Тепер оновимо файл src/routes/studentsRoutes.js, щоб замість логіки напряму викликати контролери.
+
+<em>
+ <details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { </br>
+   </summary>
+    getStudents, </br>
+    getStudentById </br>
+    } from '../controllers/studentsController.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get('/students', getStudents); </br>
+    router.get('/students/:studentId', getStudentById); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+</br>
+<strong>Підсумок</strong>
+
+Ми винесли контролери в окремий файл і тепер маршрути виглядають більш чисто. Така організація дозволяє:
+
+- відокремити логіку обробки запитів від опису маршрутів;
+- полегшити підтримку та рефакторинг коду;
+- підготувати ґрунт для подальшої роботи (наприклад, додавання нових методів чи валідації).
+
+</details>
+
+</li>
+
+<li>
+<details>
+<summary>Обробка помилок</summary>
+
+# Обробка помилок
+
+Уяви, що в кожному контролері ти вручну пишеш обробку помилок — це швидко перетворюється на хаос: дублювання коду, різні формати відповіді й зайва плутанина. Набагато зручніше мати єдине місце для обробки помилок — спеціальне middleware errorHandler яке у нас вже є.
+
+Для цього нам потрібно лише навчитися передавати помилки з контролерів у middleware. Це робиться за допомогою виклику next(error).
+
+## Базова обробка помилки
+
+У контролері getStudentById метод Student.findById повертає null, якщо студент із переданим id не знайдений. Цей випадок потрібно обробити. Додамо параметр next у функцію та викличемо його у разі відсутності студента.
+
+Обов’язково після виклику next ставимо return, щоб припинити виконання коду в контролері.
+
+<em>
+ <details>
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      // Додаємо третій параметр next до контролера </br>
+      export const getStudentById = async (req, res, next) => { </br>
+   </summary>
+    const { studentId } = req.params; </br>
+    const student = await Student.findById(studentId); </br>
+     </br>
+    // Код що був до цього </br>
+    // if (!student) { </br>
+    // return res.status(404).json({ message: 'Student not found' }); </br>
+    // } </br>
+     </br>
+        // Додаємо базову обробку помилки замість res.status(404) </br>
+     </br>
+    if (!student) { </br>
+    next(new Error('Student not found')); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Виклик next передає управління наступному middleware у ланцюжку. Якщо забути написати return, код після next усе одно виконається — і це часта помилка початківців.
+
+## Використання http-errors
+
+Але є нюанс: у цьому випадку ми створюємо «звичайну» помилку. Наш обробник (errorHandler) відповідає на неї кодом 500 Internal Server Error. Це неправильно, адже тут логічніше повернути 404 Not Found.
+
+Щоб робити це зручно, використаємо пакет http-errors. Він дозволяє створювати помилки з потрібним статусом і повідомленням.
+
+Встановлюємо пакет:
+
+- <em>npm install http-errors</em>
+
+У контролері використовуємо функцію createHttpError:
+
+<em>
+ <details>
+    <summary>
+      // src/controllers/studentsController.js </br>
+      import createHttpError from 'http-errors'; </br>
+       </br>
+      export const getStudentById = async (req, res, next) => { </br>
+      const { studentId } = req.params; </br>
+    </summary>
+    const student = await Student.findById(studentId); </br>
+     </br>
+    if (!student) { </br>
+    next(createHttpError(404, 'Student not found')); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Тепер замість «звичайної» помилки ми явно вказуємо код 404 і повідомлення.
+
+## Оновлюємо errorHandler
+
+У middleware errorHandler також потрібно оновити код, щоб він відрізняв HTTP-помилки від інших.
+
+<em>
+ <details>
+   <summary>
+      // src/middleware/errorHandler.js </br>
+       </br>
+      import { HttpError } from "http-errors"; </br>
+       </br>
+      export const errorHandler = (err, req, res, next) => { </br>
+   </summary>
+    console.error("Error Middleware:", err); </br>
+     </br>
+    // Якщо помилка створена через http-errors </br>
+    if (err instanceof HttpError) { </br>
+    return res.status(err.status).json({ </br>
+    message: err.message || err.name, </br>
+    }); </br>
+    } </br>
+     </br>
+    const isProd = process.env.NODE_ENV === "production"; </br>
+     </br>
+    // Усі інші помилки — як внутрішні </br>
+    res.status(500).json({ </br>
+    message: isProd </br>
+    ? "Something went wrong. Please try again later." </br>
+    : err.message, </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+<strong>HttpError</strong> — це свідомо створені помилки, які ми самі генеруємо в коді (наприклад, createError(400, "Bad request"), createError(404, "Not Found") тощо). Такі повідомлення вважаються безпечними для користувача, оскільки вони не містять внутрішніх деталей застосунку чи бази даних. Тому їх можна повертати "як є" як у режимі розробки, так і в продакшені.
+
+А от для решти помилок ситуація інша. Їхні повідомлення можуть містити:
+
+- частину Mongo-запиту,
+- stack trace,
+- назви внутрішніх змінних чи функцій.
+
+  Таку інформацію небезпечно показувати у продакшені, тому:
+
+- у development ми повертаємо реальний err.message, щоб було зручно дебажити,
+- у production віддаємо лише загальне дружнє повідомлення, без деталей.
+
+Результат
+
+Тепер, якщо відправити запит на GET /students/:id із неіснуючим id, отримаємо у відповідь:
+
+- статус: 404 Not Found,
+- повідомлення: "Student not found".
+
+Таким чином ми винесли обробку помилок у єдине місце, зробили її більш правильною та зрозумілою для клієнта.
+
+</details>
+</li>
 </ul>
 </details>
