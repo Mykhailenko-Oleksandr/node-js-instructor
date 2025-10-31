@@ -1,6 +1,7 @@
 // src/server.js
 
 import express from 'express';
+import helmet from "helmet";
 import 'dotenv/config';
 import cors from 'cors';
 import { connectMongoDB } from './db/connectMongoDB.js';
@@ -14,6 +15,7 @@ const PORT = process.env.PORT ?? 3000;
 
 // Глобальні middleware
 app.use(logger); // 1. Логер першим — бачить усі запити
+app.use(helmet());
 app.use(express.json()); // 2. Парсинг JSON-тіла
 app.use(cors()); // 3. Дозвіл для запитів з інших доменів
 

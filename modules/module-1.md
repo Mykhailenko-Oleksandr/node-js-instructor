@@ -2204,5 +2204,416 @@ src/ </br>
 
 </details>
 </li>
+<li>
+<details>
+<summary>CRUD</summary>
+
+# Тіло HTTP-запиту
+
+Ми вже створювали GET-маршрути, які дозволяють отримувати дані. Наприклад, GET /students повертає список студентів, а GET /students/:id — одного конкретного студента.
+
+У таких запитах клієнт (браузер чи Postman) передає мінімум інформації — тільки сам маршрут та іноді параметри. Але якщо ми хочемо створити нового студента (POST) або оновити дані існуючого (PUT чи PATCH), цього недостатньо. Нам потрібно передати більше інформації — наприклад, ім’я, вік чи оцінку студента. Ці дані ми передаємо у тілі запиту.
+
+## Що таке тіло запиту?
+
+<strong>Тіло запиту (request body</strong>) — це частина HTTP-запиту, яка містить дані. Вона йде після заголовків (headers) і може містити текст, JSON, XML, HTML або навіть файли.
+
+Найчастіше бекенд-розробники працюють із тілом у форматі JSON, бо це зручно й знайомо: тіло запиту виглядає як об’єкт JavaScript.
+
+Приклад:
+
+<em>
+  { </br>
+  "name": "Alice", </br>
+  "age": 20, </br>
+  "gender": "female" </br>
+  } </br>
+</em>
+</br>
+
+Коли клієнт надсилає такий об’єкт у запиті POST /students, сервер отримає ці дані та створить нового студента в базі.
+
+## Як сервер розуміє тіло запиту?
+
+Для цього використовуються HTTP-заголовки. Найважливіший із них — <strong>Content-Type</strong>.
+
+- Якщо Content-Type: application/json, сервер очікує, що тіло запиту буде у форматі JSON.
+- Якщо Content-Type: multipart/form-data, то тіло містить файл (або кілька файлів) разом із даними форми.
+- Якщо Content-Type: text/plain, сервер отримає просто звичайний текст.
+
+Заголовок <strong>Content-Length</strong> вказує розмір тіла запиту в байтах. Він зазвичай виставляється автоматично і допомагає переконатися, що дані передані повністю.
+
+Приклад:
+
+<em>
+  Content-Type: application/json
+  Content-Length: 256
+</em>
+
+Що будемо використовувати?
+
+У нашому курсі ми працюватимемо з двома основними варіантами:
+
+- application/json — для POST, PUT та PATCH запитів, коли ми передаємо дані у вигляді JSON-об’єкта.
+- multipart/form-data — для завантаження файлів (цей варіант ми розглянемо пізніше).
+
+</details>
+</li>
+<li>
+<details>
+<summary>Обробка тіла запиту</summary>
+
+# Обробка тіла запиту
+
+Щоб створювати (POST) або оновлювати (PUT, PATCH) ресурси, ми передаємо дані в тілі запиту. У контролері ці дані можна отримати з об’єкта req як властивість body.
+
+<em>
+  const controller = (req, res) => { </br>
+  const body = req.body; </br>
+  }; </br>
+</em>
+ </br>
+Але якщо спробувати вивести req.body без додаткових налаштувань — він буде порожнім. Чому так? Тому що Express за замовчуванням не знає, як "розпакувати" тіло запиту. Для цього потрібна спеціальна middleware, яка вміє парсити дані.
+
+## Вбудована middleware Express
+
+У сучасних версіях Express достатньо додати в server.js таке налаштування:
+
+<em>
+  import express from 'express'; </br>
+ </br>
+  const app = express(); </br>
+ </br>
+  // ця middleware "вчить" Express розуміти JSON у тілі запиту </br>
+  app.use(express.json()); </br>
+</em>
+</br>
+
+Це налаштування ми вже додали в нашому проєкті. Завдяки йому Express автоматично парсить тіло запиту, якщо заголовок Content-Type встановлений у application/json. У такому випадку дані потрапляють у req.body як звичайний JavaScript-об’єкт.
+
+Раніше для цього використовували окремий пакет body-parser, але тепер він вбудований у Express, тож додатково встановлювати його не потрібно.
+
+## Інші формати JSON
+
+Іноді клієнти можуть надсилати JSON із менш стандартними заголовками. Наприклад, за специфікацією <strong>JSON:API</strong> використовується <strong>application/vnd.api+json</strong>. У такому випадку потрібно явно вказати додаткові типи:
+
+<em>
+  import express from 'express'; </br>
+   </br>
+  const app = express(); </br>
+   </br>
+  app.use(express.json({ </br>
+  type: ['application/json', 'application/vnd.api+json'], </br>
+  })); </br>
+</em>
+ </br>
+
+## Обмеження розміру тіла
+
+Щоб захистити сервер від занадто великих запитів (наприклад, якщо користувач випадково чи навмисно надсилає дуже великий об’єкт), можна задати ліміт на розмір тіла.
+
+<em>
+  import express from 'express'; </br>
+   </br>
+  const app = express(); </br>
+   </br>
+  app.use(express.json({ </br>
+  limit: '100kb', // максимум 100 кілобайт </br>
+  })); </br>
+</em>
+ </br>
+У разі перевищення ліміту запит буде відхилений із помилкою.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Роут POST запиту</summary>
+
+# Роут POST запиту
+
+Додаємо можливість створювати нового студента до колекції за маршрутом POST /students. У запиті будемо очікувати тіло запиту, яке приходитиме як JSON.
+
+## Контролер
+
+Дописуємо контролер у файл src/controllers/studentsController.js. Він читає дані з req.body і створює документ через <strong>Student.create(...)</strong>. Для запитів, які щось створюють, семантично правильно відправляти відповідь зі статус-кодом 201 Created.
+
+<em>
+  // src/controllers/studentsController.js </br>
+   </br>
+  import { Student } from '../models/student.js'; </br>
+   </br>
+  // Решта контролерів </br>
+   </br>
+  // Новий контролер </br>
+  export const createStudent = async (req, res) => { </br>
+  const student = await Student.create(req.body); </br>
+  res.status(201).json(student); </br>
+  }; </br>
+</em>
+ </br>
+Перший аргумент для Student.create() обов’язковий і має містити об'єкт даних, які будуть використані для створення нового документа у колекції. База даних створює новий документ, додає до нього унікальний ідентифікатор та повертає створений об’єкт.
+
+Очікуваний приклад тіла запиту (поля мають відповідати нашій схемі Student):
+
+<em>
+  { </br>
+  "name": "John Doe", </br>
+  "age": 18, </br>
+  "gender": "male", </br>
+  "avgMark": 10.3, </br>
+  "onDuty": true </br>
+  } </br>
+</em>
+ </br>
+Якщо тіло не відповідає схемі (наприклад, бракує обов’язкових полів або неправильні типи), Mongoose згенерує базову помилку валідації. Такі помилки автоматично підуть у наш errorHandler.
+
+## Роут
+
+Підключаємо контролер у маршрутизатор студентів:
+
+<em>
+  <details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { </br>
+      getStudents, </br>
+   </summary>
+    getStudentById, </br>
+    createStudent </br>
+    } from '../controllers/studentsController.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get('/students', getStudents); </br>
+    router.get('/students/:studentId', getStudentById); </br>
+    router.post('/students', createStudent); </br>
+     </br>
+    export default router; </br>
+  </details>
+</em>
+
+## Перевірка в Postman
+
+- POST <http://localhost:3000/students>
+- Headers: Content-Type: application/json
+- Body (raw, JSON): як у прикладі вище
+
+У відповідь отримаєш 201 і створений документ (з \_id, createdAt, updatedAt тощо — якщо вони ввімкнені у схемі).
+
+</details>
+</li>
+<li>
+<details>
+<summary>Роут DELETE запиту</summary>
+
+# Роут DELETE запиту
+
+Додаємо маршрут DELETE /students/:studentId, за допомогою якого користувачі зможуть видаляти студентів з бази даних.
+
+## Контролер
+
+Для видалення документа з колекції в Mongoose використовується метод:
+
+<strong>findOneAndDelete(filter, options)</strong>
+
+де:
+
+- filter — перший аргумент, який вказує на умову пошуку документа для видалення (обов’язковий);
+- options — об’єкт із додатковими налаштуваннями (необов’язковий);
+
+У контролері отримуємо studentId із параметрів, видаляємо студента через Mongoose-метод findOneAndDelete, і якщо такого не існує — повертаємо помилку 404. Якщо все добре — повертаємо 200 Success.
+
+<em>
+ <details>
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      import createHttpError from 'http-errors'; </br>
+      import { Student } from '../models/student.js'; </br>
+   </summary>
+     </br>
+    /_ Решта коду файлу _/ </br>
+     </br>
+    export const deleteStudent = async (req, res, next) => { </br>
+    const { studentId } = req.params; </br>
+    const student = await Student.findOneAndDelete({ </br>
+    \_id: studentId, </br>
+    }); </br>
+     </br>
+    if (!student) { </br>
+    next(createHttpError(404, "Student not found")); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+
+## Роут
+
+Додаємо DELETE-роут /students/:studentId та підключаємо контролер:
+
+<em>
+ <details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from "express"; </br>
+      import { </br>
+      getStudents, </br>
+   </summary>
+    getStudentById, </br>
+    createStudent, </br>
+    deleteStudent, </br>
+    } from "../controllers/studentsController.js"; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get("/students", getStudents); </br>
+    router.get("/students/:studentId", getStudentById); </br>
+    router.post("/students", createStudent); </br>
+    router.delete("/students/:studentId", deleteStudent); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+
+## Перевірка в Postman
+
+Перевіримо роботу нового маршруту в Postman:
+
+- Метод: DELETE
+- URL: http://localhost:3000/students/:studentId
+
+У разі успіху отримаємо відповідь 200 Success із видаленим об’єктом студента. Якщо такого id немає — повернеться 404 Not Found.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Роут PATCH запиту</summary>
+
+# Роут PATCH запиту
+
+Додаємо маршрут PATCH /students/:studentId, за допомогою якого користувачі зможуть частково оновлювати дані студентів у базі даних. Від PUT метод PATCH відрізняється тим, що оновлюється не весь ресурс, а лише окремі його поля.
+
+## Метод Mongoose
+
+Для оновлення документа в Mongoose використовується метод:
+
+<strong>findOneAndUpdate(query, update, options)</strong>
+
+де:
+
+- query — об’єкт умов пошуку документа (обов’язковий);
+- update — об’єкт із даними для оновлення (обов’язковий);
+- options — об’єкт додаткових налаштувань (необов’язковий), наприклад:
+  - new: true — повернути оновлений документ;
+  - includeResultMetadata: true — додати метадані результату;
+  - upsert: true — створити документ, якщо не знайдено (для PATCH зазвичай не використовуємо).
+
+## Контролер
+
+У контролері беремо studentId з параметрів, req.body — дані для часткового оновлення. Якщо студента не знайдено — повертаємо 404. Якщо все добре — повертаємо 200 і оновлений документ.
+
+<em>
+ <details>
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      import createHttpError from 'http-errors'; </br>
+      import { Student } from '../models/student.js'; </br>
+   </summary>
+     </br>
+    /_ Решта коду файлу _/ </br>
+     </br>
+    export const updateStudent = async (req, res, next) => { </br>
+    const { studentId } = req.params; </br>
+     </br>
+    const student = await Student.findOneAndUpdate( </br>
+    { \_id: studentId }, // Шукаємо по id </br>
+    req.body, </br>
+    { new: true }, // повертаємо оновлений документ </br>
+    ); </br>
+     </br>
+    if (!student) { </br>
+    next(createHttpError(404, 'Student not found')); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+У тілі запиту будемо очікувати частковий об’єкт даних для оновлення студента з наступними властивостями:
+
+  </br>
+<em>
+  { </br>
+  "name": "John Doe", </br>
+  "email": "jojndoe@mail.com", </br>
+  "age": 18, </br>
+  "gender": "male", </br>
+  "avgMark": 10.3, </br>
+  "onDuty": true </br>
+  } </br>
+</em>
+ </br>
+Роут
+
+Підключаємо контролер у маршрутизатор студентів:
+
+<em>
+ <details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { </br>
+      getStudents, </br>
+   </summary>
+    getStudentById, </br>
+    createStudent, </br>
+    deleteStudent, </br>
+    updateStudent, </br>
+    } from '../controllers/studentsController.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get('/students', getStudents); </br>
+    router.get('/students/:studentId', getStudentById); </br>
+    router.post('/students', createStudent); </br>
+    router.delete('/students/:studentId', deleteStudent); </br>
+    router.patch('/students/:studentId', updateStudent); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+
+## Перевірка в Postman
+
+Перевіримо роботу нового маршруту в Postman:
+
+- Метод: PATCH
+- URL: http://localhost:3000/students/:studentId
+- Body (raw, JSON), наприклад:</br>
+
+  <em>
+  { </br>
+  "avgMark": 9.8, </br>
+  "onDuty": false </br>
+  } </br>
+  </em>
+  </br>
+  У разі успіху отримаємо відповідь 200 Success з оновленим об’єктом студента. Якщо такого id немає — повернеться 404 Not Found.
+
+</details>
+</li>
 </ul>
 </details>
