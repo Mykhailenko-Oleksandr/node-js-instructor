@@ -2617,3 +2617,437 @@ src/ </br>
 </li>
 </ul>
 </details>
+<details>
+<summary>Module 3</summary>
+<ul>
+<li>
+<details>
+<summary>Схеми валідації</summary>
+
+# Схеми валідації
+
+<strong>Joi</strong> — це бібліотека для валідації даних у Node.js. Вона дозволяє:
+
+- створювати схеми для об’єктів;
+- перевіряти об’єкти на відповідність цим схемам;
+- налаштовувати повідомлення про помилки.
+
+Усі схеми ми зберігатимемо в окремій папці src/validations/. Для студентів це буде файл:
+
+- src/validations/studentsValidation.js
+
+## Базова схема валідації
+
+Визначення схем (Schema definition): ви можете повністю описати схеми для об'єктів, які бажаєте валідувати. Для цього використовуються методи <strong>Joi.object()</strong> та <strong>Joi.array()</strong> для структур, а також методи для примітивів (числа, рядки, булеві значення тощо). Схеми є зрозумілими та читаються майже як звичайні правила.
+
+Приклад схеми для перевірки тіла запиту під час створення нового студента:
+
+<em>
+ <details>
+   <summary>
+      import { Joi } from 'celebrate'; </br>
+       </br>
+      const bodySchema = Joi.object({ </br>
+      name: Joi.string().min(3).max(30).required(), </br>
+      age: Joi.number().integer().min(12).max(65).required(), </br>
+   </summary>
+    gender: Joi.string().valid('male', 'female', 'other').required(), </br>
+    avgMark: Joi.number().min(2).max(12).required(), </br>
+    onDuty: Joi.boolean(), </br>
+    }); </br>
+ </details>
+</em>
+ </br>
+Тут ми описали правила для кожного поля. Наприклад, name має бути рядком довжиною від 3 до 30 символів і є обов’язковим.
+
+## Використання Segments
+
+Далі потрібно визначити, яку саме частину HTTP-запиту ця схема має валідувати. Для цього ми експортуємо схему як об’єкт і через Segments вказуємо, що саме перевіряємо: body, params, query, headers чи cookies.
+
+Ось так виглядає схема для валідації тіла запиту:
+
+<em>
+<details>
+  <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from "celebrate"; </br>
+       </br>
+      export const createStudentSchema = { </br>
+  </summary>
+    [Segments.BODY]: Joi.object({ </br>
+    name: Joi.string().min(3).max(30).required(), </br>
+    age: Joi.number().integer().min(12).max(65).required(), </br>
+    gender: Joi.string().valid("male", "female", "other").required(), </br>
+    avgMark: Joi.number().min(2).max(12).required(), </br>
+    onDuty: Joi.boolean(), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+<strong>Segments</strong> — це набір «ключів», які визначають, яку саме частину запиту потрібно перевіряти:
+
+- Segments.BODY → тіло запиту (req.body);
+- Segments.PARAMS → параметри маршруту (req.params);
+- Segments.QUERY → рядок запиту (req.query);
+- Segments.HEADERS → заголовки (req.headers);
+- Segments.COOKIES → кукі (req.cookies).
+
+Ми передаємо ці значення як ключі в об’єкті запиту.
+
+Наприклад, валідація параметра маршруту /notes/:category, де category — динамічний параметр:</br>
+
+<em>
+{ </br>
+[Segments.PARAMS]: Joi.object({ </br>
+category: Joi.string().valid('work', 'study', 'personal').required(), </br>
+}) </br>
+} </br>
+</em>
+</br>
+У цьому випадку валідуються параметри маршруту, а саме :category.
+
+Якщо зробити запит GET /notes/work або GET /notes/personal — він пройде валідацію.
+Якщо ж зробити GET /notes/music — celebrate одразу поверне помилку 400 Bad Request, і контролер не виконається.
+
+## Кастомізація повідомлень про помилки
+
+За замовчуванням повідомлення про помилки в Joi можуть бути незручними для користувачів: вони занадто технічні й складні для фронтенду.
+
+Тому варто робити власні повідомлення, щоб у відповіді віддавати більш зрозумілу інформацію — що саме пішло не так із валідацією. Це полегшує обробку помилок на клієнті й покращує досвід як для розробників, так і для користувачів.
+
+Ми можемо налаштовувати повідомлення через метод <strong>.messages()</strong>:
+
+<em>
+<details>
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from 'celebrate'; </br>
+       </br>
+      export const createStudentSchema = { </br>
+      [Segments.BODY]: Joi.object({ </br>
+   </summary>
+    name: Joi.string().min(3).max(30).required().messages({ </br>
+    "string.base": "Name must be a string", </br>
+    "string.min": "Name should have at least {#limit} characters", </br>
+    "string.max": "Name should have at most {#limit} characters", </br>
+    "any.required": "Name is required", </br>
+    }), </br>
+    age: Joi.number().integer().min(12).max(65).required().messages({ </br>
+    "number.base": "Age must be a number", </br>
+    "number.min": "Age must be at least {#limit}", </br>
+    "number.max": "Age must be at most {#limit}", </br>
+    "any.required": "Age is required", </br>
+    }), </br>
+    gender: Joi.string().valid("male", "female", "other").required().messages({ </br>
+    "any.only": "Gender must be one of: male, female, or other", </br>
+    "any.required": "Gender is required", </br>
+    }), </br>
+    avgMark: Joi.number().min(2).max(12).required().messages({ </br>
+    "number.base": "Average mark must be a number", </br>
+    "number.min": "Average mark must be at least {#limit}", </br>
+    "number.max": "Average mark must be at most {#limit}", </br>
+    "any.required": "Average mark is required", </br>
+    }), </br>
+    onDuty: Joi.boolean().messages({ </br>
+    "boolean.base": "onDuty must be a boolean value", </br>
+    }), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+У цьому прикладі ми використовуємо метод .messages() для кожного правила в схемі, щоб задати власні повідомлення про помилки.
+
+- Правило string.base стосується .string().
+- Правило string.min стосується .min(), яке йде після .string().
+- І так далі.
+
+Наприклад, якщо користувач надішле name як число, Joi поверне помилку з повідомленням:
+
+- "Name must be a string"
+
+Таким чином, ми можемо гнучко налаштовувати повідомлення про помилки для кожного поля, роблячи їх більш зрозумілими та інформативними.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Middleware валідації</summary>
+
+# Middleware валідації
+
+<strong>celebrate</strong> — це middleware для Express, який обгортає Joi та спрощує валідацію в маршрутах. Він дозволяє перевіряти дані у різних частинах запиту: тіло (body), параметри (params), рядок запиту (query), заголовки (headers), кукі (cookies) тощо.
+
+- Ви описуєте схему валідації (Joi schema) і вказуєте, до якої частини запиту її застосувати.
+- celebrate виконує цю валідацію до контролера.
+- Якщо дані валідні — запит переходить далі у контролер.
+- Якщо ні — автоматично повертається помилка 400 Bad Request з поясненням, що саме не відповідає правилам.
+
+## Використання схеми у маршруті
+
+Тепер підключимо схему у маршруті POST /students, щоб валідація виконувалась автоматично до контролера:
+
+<em>
+<details>
+  <summary>
+      // src/routes/studentsRoutes.js </br>
+      </br>
+      import { Router } from 'express'; </br>
+      import { celebrate, Segments } from 'celebrate'; </br>
+      import { createStudent } from '../controllers/studentsController.js'; </br>
+  </summary>
+    import { createStudentSchema } from '../validations/studentsValidation.js'; </br>
+    </br>
+    const router = Router(); </br>
+    </br>
+    router.post('/students', celebrate(createStudentSchema), createStudent); </br>
+    </br>
+    export default router; </br>
+</details>
+</em>
+</br>
+У цьому прикладі celebrate перевіряє тіло запиту за схемою createStudentSchema. Якщо дані некоректні — клієнт одразу отримає 400 Bad Request. Якщо все гаразд — виконається контролер createStudent.
+
+Як це працює
+
+У Express маршрут може мати не лише контролер, а й кілька проміжних функцій (middleware). Вони виконуються у тому порядку, в якому ми їх вказали.
+
+У прикладі вище:
+
+- <em>router.post('/students', celebrate(createStudentSchema), createStudent);</em>
+
+- Спочатку виконується celebrate. Він бере дані з req.body і перевіряє їх за схемою.
+- Якщо дані невалідні — повертається помилка 400 Bad Request, і контролер не запускається.
+- Якщо дані валідні — виконується наступна функція, тобто контролер createStudent.
+
+Таким чином, додавання celebrate другим аргументом у маршруті гарантує, що контролер працює лише з перевіреними даними.
+
+## Middleware для обробки помилок
+
+Ми вже бачили, що celebrate автоматично генерує помилки при невдалій валідації (наприклад, якщо studentId має неправильний формат). Але щоб ці помилки правильно відображалися у нашому додатку, потрібно підключити спеціальний <strong>middleware errors()</strong> від celebrate.
+
+Де саме підключати?
+
+Усі middleware виконуються у порядку, в якому вони оголошені.
+Тому errors() має бути підключений до глобального errorHandler.
+Це потрібно для того, щоб спочатку відловлювались помилки валідації celebrate, а вже потім — усі інші.
+
+<em>
+ <details>
+   <summary>
+      // src/server.js </br>
+       </br>
+      import express from "express"; </br>
+      import "dotenv/config"; </br>
+      import cors from "cors"; </br>
+   </summary>
+    // Імпортуємо middleware </br>
+    import { errors } from "celebrate"; </br>
+    import { connectMongoDB } from "./db/connectMongoDB.js"; </br>
+    import { logger } from "./middleware/logger.js"; </br>
+    import { notFoundHandler } from "./middleware/notFoundHandler.js"; </br>
+    import { errorHandler } from "./middleware/errorHandler.js"; </br>
+    import studentsRoutes from "./routes/studentsRoutes.js"; </br>
+     </br>
+    const app = express(); </br>
+    const PORT = process.env.PORT ?? 3000; </br>
+     </br>
+    app.use(logger); </br>
+    app.use(express.json()); </br>
+    app.use(cors()); </br>
+     </br>
+    app.use(studentsRoutes); </br>
+     </br>
+    // обробка 404 </br>
+    app.use(notFoundHandler); </br>
+    // обробка помилок від celebrate (валідація) </br>
+    app.use(errors()); </br>
+    // глобальна обробка інших помилок </br>
+    app.use(errorHandler); </br>
+     </br>
+    await connectMongoDB(); </br>
+     </br>
+    app.listen(PORT, () => { </br>
+    console.log(`Server is running on port ${PORT}`); </br>
+    }); </br>
+ </details>
+</em>
+ </br>
+Якщо не підключити errors() від celebrate, то помилки валідації не будуть коректно оброблятися й ви отримаєте сирі Joi-помилки в консолі.
+
+Правильний порядок підключення гарантує, що:
+
+- notFoundHandler ловить відсутні маршрути;
+- errors() перехоплює проблеми з валідацією;
+- errorHandler закриває все інше.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Валідація ідентифікатора</summary>
+
+# Валідація ідентифікатора
+
+У MongoDB кожен документ має унікальний ідентифікатор у полі \_id. Це ObjectId, який має строго визначений формат:
+
+- завжди рядок у шістнадцятковому (hex) вигляді;
+- довжина — рівно 24 символи (12 байт у двійковому представленні);
+- автоматично генерується MongoDB при створенні документа.
+
+Через це будь-який довільний рядок (навіть із 24 символів) не обов’язково буде валідним ObjectId. Якщо такий рядок передати у запит, MongoDB може повернути помилку або просто не знайти документ.
+
+Щоб цього уникнути, ми додаємо валідацію ідентифікатора ще на рівні API. Це дозволяє:
+
+- відсіювати некоректні або шкідливі запити;
+- не передавати у базу "сміттєві" значення;
+- одразу повертати зрозумілу помилку клієнту.
+
+## Функція objectIdValidator
+
+Створимо кастомний валідатор для Joi, який перевірятиме значення на валідність ObjectId.
+
+<em>
+<details>
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from 'celebrate'; </br>
+      import { isValidObjectId } from 'mongoose'; </br>
+   </summary>
+     </br>
+    // Кастомний валідатор для ObjectId </br>
+    const objectIdValidator = (value, helpers) => { </br>
+    return !isValidObjectId(value) ? helpers.message('Invalid id format') : value; </br>
+    }; </br>
+     </br>
+    // Схема для перевірки параметра studentId </br>
+    export const studentIdParamSchema = { </br>
+    [Segments.PARAMS]: Joi.object({ </br>
+    studentId: Joi.string().custom(objectIdValidator).required(), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+<strong>isValidObjectId(value)</strong> — це утиліта з Mongoose, яка перевіряє, чи рядок відповідає формату MongoDB ObjectId.
+Якщо isValidObjectId повертає false, ми викликаємо helpers.message('Invalid id format'), щоб створити помилку в Joi.
+Якщо все гаразд, функція просто повертає значення далі.
+
+Таким чином, ми отримуємо зрозумілу помилку для клієнта замість технічної MongoDB-помилки.
+
+## Використання у маршрутах
+
+Додамо схему у маршрут /students/:studentId, щоб celebrate автоматично перевіряв параметр studentId:
+
+<em>
+<details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+   </summary>
+     </br>
+    import { getStudentById, deleteStudent } from '../controllers/studentsController.js'; </br>
+    import { studentIdParamSchema } from '../validations/studentsValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.get('/students/:studentId', celebrate(studentIdParamSchema), getStudentById); </br>
+    router.delete('/students/:studentId', celebrate(studentIdParamSchema), deleteStudent); </br>
+     </br>
+    export default router; </br>
+</details>
+</em>
+ </br>
+Ми використовуємо одну й ту саму схему для обох маршрутів:
+
+- GET /students/:studentId — отримання студента за id;
+- DELETE /students/:studentId — видалення студента за id.
+
+Це дозволяє уникнути дублювання коду й зберігати валідацію в одному місці.
+
+Тепер:
+
+- Якщо id валідний → виконується контролер.
+- Якщо id невалідний → celebrate одразу повертає 400 Bad Request з повідомленням "Invalid id format".
+
+</details>
+</li>
+<li>
+<details>
+<summary>Валідація для PATCH</summary>
+
+# Валідація для PATCH
+
+Тепер ми реалізуємо валідацію для маршруту PATCH /students/:studentId.
+
+У цьому випадку потрібно перевіряти дві речі:
+
+- Ідентифікатор у параметрах маршруту. studentId має бути валідним ObjectId. Це дозволяє відсікти некоректні запити ще до звернення до бази.
+- Тіло запиту. Оскільки це PATCH, усі поля є необов’язковими, але хоча б одне повинно бути передано. Для цього у Joi використовується .min(1).
+
+Створимо схему, яка перевірятиме одночасно і params, і body:
+
+<em>
+<details>
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from 'celebrate'; </br>
+      import { isValidObjectId } from 'mongoose'; </br>
+   </summary>
+     </br>
+    // Кастомний валідатор для ObjectId </br>
+    const objectIdValidator = (value, helpers) => { </br>
+    return !isValidObjectId(value) ? helpers.message('Invalid id format') : value; </br>
+    }; </br>
+     </br>
+    export const updateStudentSchema = { </br>
+    [Segments.PARAMS]: Joi.object({ </br>
+    studentId: Joi.string().custom(objectIdValidator).required(), </br>
+    }), </br>
+    [Segments.BODY]: Joi.object({ </br>
+    name: Joi.string().min(3).max(30), </br>
+    age: Joi.number().integer().min(12).max(65), </br>
+    gender: Joi.string().valid('male', 'female', 'other'), </br>
+    avgMark: Joi.number().min(2).max(12), </br>
+    onDuty: Joi.boolean(), </br>
+    }).min(1), // важливо: не дозволяємо порожнє тіло </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Тепер використаємо цю схему у маршруті PATCH /students/:studentId:</br>
+</br>
+<em>
+<details>
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+      import { updateStudent } from '../controllers/studentsController.js'; </br>
+   </summary>
+    import { updateStudentSchema } from '../validations/studentsValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.patch('/students/:studentId', celebrate(updateStudentSchema), updateStudent); </br>
+     </br>
+    export default router; </br>
+</details>
+</em>
+ </br>
+- Якщо studentId невалідний → повертається 400 Bad Request з повідомленням "Invalid id format".
+- Якщо тіло запиту порожнє → повертається 400 Bad Request з повідомленням від Joi.
+- Якщо дані валідні → виконується контролер updateStudent.
+
+</details>
+</li>
+</ul>
+</details>

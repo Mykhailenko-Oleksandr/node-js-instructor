@@ -1,7 +1,7 @@
 // src/server.js
 
 import express from 'express';
-import helmet from "helmet";
+import helmet from 'helmet';
 import 'dotenv/config';
 import cors from 'cors';
 import { connectMongoDB } from './db/connectMongoDB.js';
@@ -9,6 +9,7 @@ import { logger } from './middleware/logger.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import studentsRoutes from './routes/studentsRoutes.js';
+import { errors } from 'celebrate';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -24,6 +25,9 @@ app.use(studentsRoutes);
 
 // 404 — якщо маршрут не знайдено
 app.use(notFoundHandler);
+
+// обробка помилок від celebrate (валідація)
+app.use(errors());
 
 // Error — якщо під час запиту виникла помилка
 app.use(errorHandler);
