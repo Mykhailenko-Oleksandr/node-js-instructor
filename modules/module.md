@@ -32,7 +32,7 @@ cd nodejs-app
 З’явиться файл package.json із базовою інформацією про проєкт. Додамо сучасний режим ESM (щоб можна було використовувати import/export), додавши властивість "type": "module".
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>{ </br>
 "name": "nodejs-app", </br>
 "version": "1.0.0", </br></summary>
@@ -60,13 +60,16 @@ cd nodejs-app
 
 Створимо папку src, де зберігатиметься весь код, і додамо у ній перший файл index.js з таким вмістом:
 
-<em>
-  // src/index.js
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/index.js
 
 const message = 'Hello world';
 
 console.log(message);
 </em>
+
+</div>
 
 JavaScript-код можна виконати за допомогою команди node, вказавши після неї шлях до файлу, який потрібно запустити:
 
@@ -82,23 +85,25 @@ Hello world
 
 Встановіть його як залежність для розробки командою:
 
-- <em>npm install -D nodemon</em>
+- <em  style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install -D nodemon</em>
 
 Додайте скрипт у файл package.json:
 
-<em>
-  // package.json </br>
-   </br>
-  { </br>
-  "scripts": { </br>
-  "dev": "nodemon src/index.js" </br>
-  } </br>
-  } </br>
-</em>
+<div  style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em >
+    // package.json </br>
+     </br>
+    { </br>
+    "scripts": { </br>
+    "dev": "nodemon src/index.js" </br>
+    } </br>
+    } </br>
+  </em>
+</div>
  </br>
 Тепер ви можете запускати застосунок за допомогою команди:
 
-- <em>npm run dev</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm run dev</em>
 
 При збереженні змін у JavaScript-файлах він буде автоматично перезапускатися.
 
@@ -117,7 +122,7 @@ Hello world
 Встановіть розширення EditorConfig та створіть файл <strong>.editorconfig</strong>. Він забезпечує однакові відступи, кодування й кінцівки рядків у різних редакторах. Такі налаштування допомагають уникнути проблем, пов’язаних із різницею символів кінця рядка між різними операційними системами.
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>root = true </br>
   </br>
   [*] </br></summary>
@@ -135,7 +140,7 @@ Hello world
 Встановіть розширення Prettier та додайте файл <strong>.prettierrc</strong>, у якому зберігатимуться налаштування для форматування коду.
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>{ </br>
 "semi": true, </br>
 "singleQuote": true, </br></summary>
@@ -158,12 +163,12 @@ Hello world
 
 У наступному відео розглянемо етапи ініціалізації ESLint у проєкті командою:
 
-npm init @eslint/config@latest
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm init @eslint/config@latest</em>
 
 Замініть вміст свого файлу eslint.config.mjs наступним кодом. Ми трохи його доповнили під наші потреби, додавши властивість rules.
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>import js from "@eslint/js"; </br>
 import globals from "globals"; </br>
 import { defineConfig } from "eslint/config"; </br></summary>
@@ -189,7 +194,7 @@ semi: "error", </br>
 Файл <strong>.gitignore</strong> використовується для вказання файлів і папок, які не повинні потрапляти в репозиторій Git.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>.vscode </br>
 .DS_Store </br>
 .idea </br></summary>
@@ -368,7 +373,7 @@ vite.config.ts.timestamp-* </br>
 Об’єднує частини шляху у правильний формат для поточної ОС.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>import path from "node:path";
 
 const somePath = path.join("some_folder", "some_file.txt");</summary>
@@ -382,7 +387,7 @@ const somePath = path.join("some_folder", "some_file.txt");</summary>
 Можна вкладати виклики, щоб будувати складніші шляхи:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>import path from "node:path";
 
 // абсолютний шлях до робочої директорії
@@ -404,7 +409,7 @@ const pathToFile = path.join(pathToWorkDir, "some_folder", "some_file.txt");
 Розбирає рядок-шлях на складові частини:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
     import path from "node:path"; </br>
     </br>
@@ -452,7 +457,7 @@ _/
 <strong>fs.readFileSync(path, options)</strong> — синхронне читання вмісту файла. Приймає шлях до файлу та, за потреби, кодування ("utf8", "ascii" тощо). Якщо кодування не вказано, повертає Buffer, якщо вказано — звичайний рядок.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>
       import fs from "node:fs"; </br>
  </br>
@@ -470,7 +475,7 @@ _/
 <strong>fs.readFile(path, options)</strong> — асинхронне читання вмісту файла. Приймає шлях і опції. Повертає Promise, який у разі успіху містить або Buffer, або рядок (залежно від того, чи вказано кодування).
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       import fs from "node:fs/promises"; </br>
      </br>
@@ -491,53 +496,68 @@ _/
 
 <strong>fs.writeFileSync(path, data, options)</strong> — синхронний запис у файл. Якщо файл існує — перезапише його, якщо ні — створить новий.
 
-<em>
-  import fs from "node:fs";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs";
 
 fs.writeFileSync("output.txt", "Привіт з Node.js!", "utf8");
 </em>
 
+</div>
+
 <strong>fs.writeFile(path, data, options)</strong> — асинхронний запис у файл. Повертає Promise, що виконується після завершення операції.
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 await fs.writeFile("output.txt", "Привіт з Node.js!", "utf8");
 console.log("Дані успішно записані у файл.");
 </em>
 
+</div>
+
 ### Додавання у файл
 
 <strong>fs.appendFile(path, data, options)</strong> — асинхронне додавання у файл. Дописує дані в кінець файлу.
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 await fs.appendFile("output.txt", "\\nЩе один рядок", "utf8");
 console.log("Дані успішно додані у файл.");
 </em>
 
+</div>
+
 ### Перейменування / переміщення файлів
 
 <strong>fs.rename(oldPath, newPath)</strong> — асинхронне перейменування або переміщення файлу. Повертає Promise.
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 await fs.rename("oldfile.txt", "newfile.txt");
 console.log("Файл успішно перейменовано.");
 </em>
 
+</div>
+
 ### Видалення файлу
 
 <strong>fs.unlink(path)</strong> — асинхронне видалення файлу. Повертає Promise.
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 await fs.unlink("file.txt");
 console.log("Файл успішно видалено.");
 </em>
+
+</div>
 
 <strong>Підсумок</strong>
 
@@ -563,8 +583,9 @@ console.log("Файл успішно видалено.");
 
 <strong>Buffer</strong> у Node.js — це масив байтів. Кожен байт може зберігати невелике значення (наприклад, код символу).
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 const buffer = await fs.readFile("hello.txt");
 // якщо у файлі hello.txt був текст "Hello World!"
@@ -572,6 +593,8 @@ const buffer = await fs.readFile("hello.txt");
 console.log(buffer);
 // <Buffer 48 65 6c 6c 6f 20 57 6f 72 6c 64 21>
 </em>
+
+</div>
 
 Вивід <Buffer ...> показує набір байтів у шістнадцятковій системі (hex). Кожен байт відповідає одному символу або службовому знаку (наприклад, пробілу).
 
@@ -581,12 +604,15 @@ console.log(buffer);
 
 Найпоширеніше текстове кодування — <strong>UTF-8</strong>. Саме воно дозволяє перетворити байти у символи:
 
-<em>
-  import fs from "node:fs/promises";
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import fs from "node:fs/promises";
 
 const buffer = await fs.readFile("hello.txt");
 console.log(buffer.toString("utf-8")); // Hello World!
 </em>
+
+</div>
 
 Якщо при читанні файлу одразу вказати кодування ("utf8"), результатом буде рядок, а не Buffer. Якщо кодування не вказано — повертається Buffer.
 
@@ -621,15 +647,17 @@ console.log(buffer.toString("utf-8")); // Hello World!
 - В університеті — студент.
   Наприклад, ресурс «студент» може виглядати так:
 
-<en>
-  { </br>
-  "id": 123, </br>
-  "name": "John Doe", </br>
-  "age": 16, </br>
-  "gender": "male", </br>
-  "onDuty": false </br>
-  } </br>
-</en>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <en>
+    { </br>
+    "id": 123, </br>
+    "name": "John Doe", </br>
+    "age": 16, </br>
+    "gender": "male", </br>
+    "onDuty": false </br>
+    } </br>
+  </en>
+</div>
 
 ## Методи запиту
 
@@ -708,12 +736,12 @@ Express — мінімалістичний веб-фреймворк для Node
 
 Встанови пакет:
 
-- <em>npm install express</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install express</em>
 
 Мінімальний застосунок (app boilerplate) — файл <strong>src/server.js</strong>:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
 <summary>// src/server.js
 import express from 'express';
 
@@ -737,17 +765,21 @@ console.log(`Server is running on port ${PORT}`);
 
 Онови скрипт запуску в package.json:
 
-// package.json </br>
-</br>
-{ </br>
-"scripts": { </br>
-"dev": "nodemon src/server.js" </br>
-} </br>
-} </br>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // package.json </br>
+    </br>
+    { </br>
+    "scripts": { </br>
+    "dev": "nodemon src/server.js" </br>
+    } </br>
+    } </br>
+  </em>
+</div>
 
 Запусти у dev-режимі (ми вже налаштували nodemon у попередньому занятті):
 
-- <em>npm run dev</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm run dev</em>
 
 Перейди в браузері або зроби GET запит у POSTMAN на http://localhost:3000 — побачиш JSON-відповідь.
 
@@ -768,14 +800,16 @@ console.log(`Server is running on port ${PORT}`);
 
 Перший маршрут:
 
-<em>
-  // GET-запит до кореневого маршруту "/" </br>
-  app.get('/', (req, res) => { </br>
-  res.status(200).json({ </br>
-  message: 'Hello world!', </br>
-  }); </br>
-  }); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // GET-запит до кореневого маршруту "/" </br>
+    app.get('/', (req, res) => { </br>
+    res.status(200).json({ </br>
+    message: 'Hello world!', </br>
+    }); </br>
+    }); </br>
+  </em>
+</div>
 </br>
 Що тут відбувається:
 
@@ -788,7 +822,7 @@ console.log(`Server is running on port ${PORT}`);
 Маршрутів може бути скільки завгодно
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // GET-запит до кореневого маршруту "/" </br>
       app.get('/', (req, res) => { </br>
@@ -819,19 +853,21 @@ console.log(`Server is running on port ${PORT}`);
 
 У багатьох випадках потрібно отримати конкретний ресурс за його ідентифікатором: користувача за id, товар за id, статтю за slug тощо. Для цього в Express використовуються динамічні параметри.
 
-<em>
-  // Список усіх користувачів </br>
-  app.get('/users', (req, res) => { </br>
-  res.status(200).json([{ id: 1, name: 'Alice' }]); </br>
-  }); </br>
-   </br>
-  // Конкретний користувач за id </br>
-  app.get('/users/:userId', (req, res) => { </br>
-  const { userId } = req.params; </br>
-  res.status(200).json({ id: userId, name: 'Jacob' }); </br>
-  }); </br>
-   </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // Список усіх користувачів </br>
+    app.get('/users', (req, res) => { </br>
+    res.status(200).json([{ id: 1, name: 'Alice' }]); </br>
+    }); </br>
+     </br>
+    // Конкретний користувач за id </br>
+    app.get('/users/:userId', (req, res) => { </br>
+    const { userId } = req.params; </br>
+    res.status(200).json({ id: userId, name: 'Jacob' }); </br>
+    }); </br>
+     </br>
+  </em>
+</div>
 
 - GET /users → повертає масив користувачів.
 - GET /users/:userId → повертає дані одного користувача.
@@ -845,7 +881,7 @@ console.log(`Server is running on port ${PORT}`);
 
 Параметри завжди приходять у вигляді рядків. Якщо потрібне число, його треба конвертувати:
 
-<em>const userId = Number(req.params.userId);</em>
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">const userId = Number(req.params.userId);</em>
 
 Динамічні параметри дозволяють створювати маршрути, які працюють із конкретними ресурсами, а не лише з колекціями.
 
@@ -863,14 +899,16 @@ console.log(`Server is running on port ${PORT}`);
 
 Middleware додаються через метод app.use:
 
-<em>
-  app.use(middleware); // для всіх маршрутів
-  app.use('/path', middleware); // тільки для /path/\*
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    app.use(middleware); // для всіх маршрутів
+    app.use('/path', middleware); // тільки для /path/\*
+  </em>
+</div>
 
 Звичайні middleware мають три аргументи:
 
-<em>(req, res, next) => { ... }</em>
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">(req, res, next) => { ... }</em>
 
 - req — запит
 - res — відповідь
@@ -881,7 +919,7 @@ Middleware додаються через метод app.use:
 Приклад: логування часу
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -920,7 +958,7 @@ Middleware додаються через метод app.use:
 
 У Express є спеціальний тип middleware, який обробляє помилки. Його особливість у тому, що він завжди має чотири аргументи:
 
-<em>(err, req, res, next) => { ... }</em>
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">(err, req, res, next) => { ... }</em>
 
 - err — об’єкт помилки
 - req — запит
@@ -934,7 +972,7 @@ Express автоматично передає сюди помилки, якщо 
 Доповнимо наш приклад з логуванням додавши middleware обробки помилок:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -989,17 +1027,19 @@ Express автоматично передає сюди помилки, якщо 
 
 Бувають ситуації, коли клієнт звертається до маршруту, якого не існує, тобто до URL, який наш сервіс не підтримує. Щоб коректно обробляти такі запити, у Express додають спеціальне middleware для 404 Not Found.
 
-<em>
-  app.use((req, res) => { </br>
-  res.status(404).json({ message: 'Route not found' }); </br>
-  }); </br>
-  </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    app.use((req, res) => { </br>
+    res.status(404).json({ message: 'Route not found' }); </br>
+    }); </br>
+    </br>
+  </em>
+</div>
 
 Особливість цього middleware у тому, що воно підключається після всіх маршрутів, але перед middleware для обробки помилок. Якщо жоден із маршрутів не збігся, керування дійде сюди.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -1075,7 +1115,7 @@ Express автоматично передає сюди помилки, якщо 
 Більшість сучасних вебзастосунків обмінюються даними у форматі JSON. У Express для цього є вбудоване middleware — express.json(). Воно автоматично парсить (розпаковує) тіло HTTP-запиту, якщо воно надійшло у форматі JSON, і додає його у req.body.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -1108,18 +1148,19 @@ Express автоматично передає сюди помилки, якщо 
 
 Щоб дозволити обмін даними, сервер має вказати у відповідях спеціальний заголовок:
 
-- <em>Access-Control-Allow-Origin: \*</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">Access-Control-Allow-Origin: \*</em>
 
 Це означає, що доступ дозволений з будь-якого джерела. В Express для цього використовують пакет cors:
 
-- <em>npm install cors</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install cors</em>
 
 Підключення у коді:
 
-<em>
-  // src/server.js
-  import express from 'express';
-  import cors from 'cors';
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/server.js
+    import express from 'express';
+    import cors from 'cors';
 
 const app = express();
 
@@ -1128,6 +1169,8 @@ app.use(cors()); // Дозволяє запити з будь-яких джер�
 
 // Решта коду
 </em>
+
+</div>
 
 У більш складних випадках можна задавати конкретні домени чи методи, але для базового застосунку цього достатньо.
 
@@ -1139,12 +1182,12 @@ app.use(cors()); // Дозволяє запити з будь-яких джер�
 
 Встановлення:
 
-- <em>npm install pino-http pino-pretty</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install pino-http pino-pretty</em>
 
 Підключення у коді:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -1194,56 +1237,64 @@ app.use(cors()); // Дозволяє запити з будь-яких джер�
 
 Зазвичай такі змінні оголошуються у файлі .env, який створюється в корені проєкту. Наприклад, порт, на якому запускається сервер:
 
-<em>
-  // .env </br>
- </br>
-PORT=3000 </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // .env </br>
+   </br>
+  PORT=3000 </br>
+  </em>
+</div>
 </br>
 .env обов’язково додається в .gitignore і ніколи не комітиться в репозиторій. Якщо випадково закомітили — потрібно негайно змінити всі ключі й паролі. Навіть видалення файлу у наступному коміті не прибере його з історії.
 
 Доброю практикою є створення файлу .env.example, де перелічуються всі змінні без реальних значень. Це допомагає іншим розробникам налаштувати своє середовище:
 
-<em>
-  // .env.example </br>
- </br>
-PORT=9999 </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // .env.example </br>
+   </br>
+  PORT=9999 </br>
+  </em>
+</div>
 </br>
 Використання змінних у коді
 
 Щоб зчитувати .env, встановлюємо пакет <strong>dotenv</strong>:
 
-- <em>npm install dotenv</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install dotenv</em>
 
 Імпортуємо його у коді:
 
-<em>
-  // src/server.js </br>
- </br>
-// Такий імпорт одразу ініціалізує бібліотеку </br>
-import 'dotenv/config'; </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/server.js </br>
+   </br>
+  // Такий імпорт одразу ініціалізує бібліотеку </br>
+  import 'dotenv/config'; </br>
+  </em>
+</div>
 </br>
 У Node.js змінні доступні через глобальний об’єкт process.env:
 
-<em>
-  // src/server.js </br>
- </br>
-import express from 'express'; </br>
-import cors from 'cors'; </br>
-import pino from 'pino-http'; </br>
-import 'dotenv/config'; </br>
- </br>
-const app = express(); </br>
- </br>
-// Використовуємо значення з .env або дефолтний порт 3000 </br>
-const PORT = process.env.PORT ?? 3000; </br>
- </br>
-app.listen(PORT, () => { </br>
-console.log(`Server is running on port ${PORT}`); </br>
-}); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/server.js </br>
+   </br>
+  import express from 'express'; </br>
+  import cors from 'cors'; </br>
+  import pino from 'pino-http'; </br>
+  import 'dotenv/config'; </br>
+   </br>
+  const app = express(); </br>
+   </br>
+  // Використовуємо значення з .env або дефолтний порт 3000 </br>
+  const PORT = process.env.PORT ?? 3000; </br>
+   </br>
+  app.listen(PORT, () => { </br>
+  console.log(`Server is running on port ${PORT}`); </br>
+  }); </br>
+  </em>
+</div>
 </br>
 Значення у process.env завжди є рядками. Якщо потрібен інший тип (наприклад число чи булеве значення), його слід явно конвертувати. Використання дефолтного значення (?? 3000) захистить від ситуацій, коли змінна у .env ще не вказана.
 
@@ -1258,18 +1309,20 @@ console.log(`Server is running on port ${PORT}`); </br>
 
 Оновлюємо файл .env у корені проєкту:
 
-<em>
-  #.env
-  PORT=3000
-  NODE_ENV=development
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    #.env
+    PORT=3000
+    NODE_ENV=development
+  </em>
+</div>
 
 Тепер під час локальної розробки process.env.NODE_ENV матиме значення development.
 
 Оновлений код middleware:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/server.js </br>
        </br>
@@ -1311,13 +1364,15 @@ console.log(`Server is running on port ${PORT}`); </br>
 
 Уявіть собі величезний склад, де зберігаються всі ваші дані. Так працює база даних MongoDB: вона зберігає інформацію у вигляді документів, які виглядають як JavaScript-об’єкти.
 
-<em>
-  { </br>
-  "id": 1, </br>
-  "name": "Alice", </br>
-  "email": "alice@mail.com" </br>
-  } </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    { </br>
+    "id": 1, </br>
+    "name": "Alice", </br>
+    "email": "alice@mail.com" </br>
+    } </br>
+  </em>
+</div>
 </br>
 MongoDB можна встановити локально на комп’ютер, але набагато зручніше користуватися її хмарною версією.
 
@@ -1345,25 +1400,29 @@ MongoDB Atlas — це склад із додатковими "охоронця�
 
 Після створення бази ви отримаєте спеціальний connection string — рядок підключення. Наприклад:
 
-<em>mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0</em>
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0</em>
 
 У код його додавати не можна — це небезпечно. Натомість ми збережемо ці дані у файлі .env, щоб зручно працювати з різними середовищами (локально, на тесті, у продакшені).
 
 #.env
 
-<em>
-  PORT=3000 </br>
-  MONGO_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true& w=majority&appName=Cluster0 </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    PORT=3000 </br>
+    MONGO_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/?retryWrites=true& w=majority&appName=Cluster0 </br>
+  </em>
+</div>
 </br>
 І не забудьте оновити файл .env.example, щоб інші розробники бачили, які змінні треба налаштувати:
 
 #.env.example
 
-<em>
-  PORT= </br>
-  MONGO_URL=
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    PORT= </br>
+    MONGO_URL=
+  </em>
+</div>
 
 ## Підключення MongoDB
 
@@ -1377,14 +1436,14 @@ Mongoose спрощує роботу з базою:
 
 Встановлюємо пакет у наш проєкт:
 
-- <em>npm install mongoose</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install mongoose</em>
 
 Файл для підключення
 
 Щоб код був структурованим, створимо у папці src нову папку db, а в ній файл connectMongoDB.js. Там ми напишемо функцію для підключення до бази даних.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
     <summary>
       // src/db/connectMongoDB.js</br>
       import mongoose from 'mongoose';</br>
@@ -1415,7 +1474,7 @@ Mongoose спрощує роботу з базою:
 У файлі src/server.js імпортуємо та викликаємо функцію перед запуском сервера:
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js</br>
       </br>
@@ -1483,12 +1542,14 @@ students.json
 
 Файл .env тепер виглядає так:
 
-<em>
-  #.env </br>
- </br>
-  PORT=3000 </br>
-  MONGODB_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/students?retryWrites=true&w=majority&appName=Cluster0 </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    #.env </br>
+   </br>
+    PORT=3000 </br>
+    MONGODB_URL=mongodb+srv://borismeshkovaws:12345678@cluster0.xpxkilq.mongodb.net/students?retryWrites=true&w=majority&appName=Cluster0 </br>
+  </em>
+</div>
 </br>
 Тепер при підключенні через Mongoose ми одразу працюємо з базою students. Це означає, що всі наші моделі та колекції будуть створюватися й зберігатися саме в цій базі.
 
@@ -1527,7 +1588,7 @@ MongoDB — це документоорієнтована NoSQL база дан�
 Створимо схему для документа студента. Для цього використаємо клас Schema з бібліотеки mongoose.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/models/student.js </br>
        </br>
@@ -1581,15 +1642,17 @@ MongoDB — це документоорієнтована NoSQL база дан�
 
 Створимо модель Student на основі нашої схеми:
 
-<em>
-  // src/models/student.js </br>
-   </br>
-  import { model } from 'mongoose'; </br>
-   </br>
-  /_ Решта коду файла _/ </br>
-   </br>
-  export const Student = model('Student', studentSchema); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/models/student.js </br>
+     </br>
+    import { model } from 'mongoose'; </br>
+     </br>
+    /_ Решта коду файла _/ </br>
+     </br>
+    export const Student = model('Student', studentSchema); </br>
+  </em>
+</div>
 </br>
 Mongoose автоматично створить колекцію students у базі даних (назва береться у множині). Тепер ми можемо використовувати модель Student для взаємодії з колекцією: створювати нових студентів, отримувати список, оновлювати чи видаляти записи.
 
@@ -1607,7 +1670,7 @@ Mongoose автоматично створить колекцію students у б
 У цьому маршруті ми будемо звертатися до колекції students через вбудований метод Mongoose <strong>Student.find()</strong>, який повертає масив документів (може бути порожнім), що відповідають моделі Student.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
        </br>
@@ -1630,7 +1693,7 @@ Mongoose автоматично створить колекцію students у б
 Для цього маршруту ми використаємо вбудований метод Mongoose <strong>Student.findById()</strong>. Якщо документ із заданим ідентифікатором не буде знайдено, метод поверне null. У такому випадку ми повернемо статус 404.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/server.js </br>
        </br>
@@ -1657,7 +1720,7 @@ Mongoose автоматично створить колекцію students у б
 Повний код із підключенням middleware
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/server.js </br>
        </br>
@@ -1740,20 +1803,22 @@ Mongoose автоматично створить колекцію students у б
 
 Створюємо в папці src нову папку middleware і кладемо туди наші кастомні middleware.
 
-src/ </br>
---middleware/ </br>
-----errorHandler.js </br>
-----notFoundHandler.js </br>
-----logger.js </br>
---server.js </br>
-</br>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  src/ </br>
+  --middleware/ </br>
+  ----errorHandler.js </br>
+  ----notFoundHandler.js </br>
+  ----logger.js </br>
+  --server.js </br>
+  </br>
+</div>
 
 ## Error middleware
 
 Перенесемо middleware для обробки помилок у файл <strong>errorHandler.js</strong>.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/middleware/errorHandler.js </br>
        </br>
@@ -1780,13 +1845,15 @@ src/ </br>
 
 Тепер винесемо обробку випадку, коли клієнт звертається до неіснуючого маршруту. Для цього створимо <strong>notFoundHandler.js</strong>.
 
-<em>
-  // src/middleware/notFoundHandler.js </br>
-   </br>
-  export const notFoundHandler = (req, res) => { </br>
-  res.status(404).json({ message: 'Route not found' }); </br>
-  }; </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/middleware/notFoundHandler.js </br>
+     </br>
+    export const notFoundHandler = (req, res) => { </br>
+    res.status(404).json({ message: 'Route not found' }); </br>
+    }; </br>
+  </em>
+</div>
  </br>
 Це middleware підключається після всіх маршрутів.
 Якщо жоден маршрут не збігся, керування потрапить сюди.
@@ -1797,7 +1864,7 @@ src/ </br>
 Щоб бачити всі запити, підключимо pino-http у <strong>logger.js</strong>.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/middleware/logger.js </br>
        </br>
@@ -1829,7 +1896,7 @@ src/ </br>
 Тепер у <strong>server.js</strong> імпортуємо всі ці middleware та використовуємо їх у правильному порядку.
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/server.js </br>
       import express from 'express'; </br>
@@ -1887,22 +1954,24 @@ src/ </br>
 
 Створіть файл src/routes/studentsRoutes.js. Тут оголошуємо роутер і одразу експортуємо його. Це «порожня рамка», у яку додамо маршрути.
 
-<em>
-  // src/routes/studentsRoutes.js </br>
-   </br>
-  import { Router } from 'express'; </br>
-   </br>
-  const router = Router(); </br>
-   </br>
-  export default router; </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/routes/studentsRoutes.js </br>
+     </br>
+    import { Router } from 'express'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    export default router; </br>
+  </em>
+</div>
  </br>
 Переносимо обробники у роутер
 
 Далі переносимо контролери, які обробляють маршрути /students та /students/:studentId із файла server.js у файл роутингу studentsRoutes.js. Для їх оголошення замість app використовуємо створений router.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -1935,7 +2004,7 @@ src/ </br>
 Тепер імпортуємо створений роутер у файл server.js та додаємо його як middleware до app, за допомогою методу app.use().
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
     <summary>
       // src/server.js </br>
        </br>
@@ -2000,7 +2069,7 @@ src/ </br>
 Створіть папку src/controllers, а в ній файл studentsController.js. У цей файл винесемо контролери, які зараз знаходяться у файлі studentsRoutes.js.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/controllers/studentsController.js </br>
        </br>
@@ -2033,8 +2102,8 @@ src/ </br>
 Тепер оновимо файл src/routes/studentsRoutes.js, щоб замість логіки напряму викликати контролери.
 
 <em>
- <details>
-   <summary>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary >
       // src/routes/studentsRoutes.js </br>
        </br>
       import { Router } from 'express'; </br>
@@ -2082,7 +2151,7 @@ src/ </br>
 Обов’язково після виклику next ставимо return, щоб припинити виконання коду в контролері.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/controllers/studentsController.js </br>
        </br>
@@ -2119,12 +2188,12 @@ src/ </br>
 
 Встановлюємо пакет:
 
-- <em>npm install http-errors</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">npm install http-errors</em>
 
 У контролері використовуємо функцію createHttpError:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
     <summary>
       // src/controllers/studentsController.js </br>
       import createHttpError from 'http-errors'; </br>
@@ -2151,7 +2220,7 @@ src/ </br>
 У middleware errorHandler також потрібно оновити код, щоб він відрізняв HTTP-помилки від інших.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/middleware/errorHandler.js </br>
        </br>
@@ -2222,13 +2291,15 @@ src/ </br>
 
 Приклад:
 
-<em>
-  { </br>
-  "name": "Alice", </br>
-  "age": 20, </br>
-  "gender": "female" </br>
-  } </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    { </br>
+    "name": "Alice", </br>
+    "age": 20, </br>
+    "gender": "female" </br>
+    } </br>
+  </em>
+</div>
 </br>
 
 Коли клієнт надсилає такий об’єкт у запиті POST /students, сервер отримає ці дані та створить нового студента в базі.
@@ -2245,10 +2316,12 @@ src/ </br>
 
 Приклад:
 
-<em>
-  Content-Type: application/json
-  Content-Length: 256
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    Content-Type: application/json
+    Content-Length: 256
+  </em>
+</div>
 
 Що будемо використовувати?
 
@@ -2267,11 +2340,13 @@ src/ </br>
 
 Щоб створювати (POST) або оновлювати (PUT, PATCH) ресурси, ми передаємо дані в тілі запиту. У контролері ці дані можна отримати з об’єкта req як властивість body.
 
-<em>
-  const controller = (req, res) => { </br>
-  const body = req.body; </br>
-  }; </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    const controller = (req, res) => { </br>
+    const body = req.body; </br>
+    }; </br>
+  </em>
+</div>
  </br>
 Але якщо спробувати вивести req.body без додаткових налаштувань — він буде порожнім. Чому так? Тому що Express за замовчуванням не знає, як "розпакувати" тіло запиту. Для цього потрібна спеціальна middleware, яка вміє парсити дані.
 
@@ -2279,14 +2354,16 @@ src/ </br>
 
 У сучасних версіях Express достатньо додати в server.js таке налаштування:
 
-<em>
-  import express from 'express'; </br>
- </br>
-  const app = express(); </br>
- </br>
-  // ця middleware "вчить" Express розуміти JSON у тілі запиту </br>
-  app.use(express.json()); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import express from 'express'; </br>
+   </br>
+    const app = express(); </br>
+   </br>
+    // ця middleware "вчить" Express розуміти JSON у тілі запиту </br>
+    app.use(express.json()); </br>
+  </em>
+</div>
 </br>
 
 Це налаштування ми вже додали в нашому проєкті. Завдяки йому Express автоматично парсить тіло запиту, якщо заголовок Content-Type встановлений у application/json. У такому випадку дані потрапляють у req.body як звичайний JavaScript-об’єкт.
@@ -2297,30 +2374,34 @@ src/ </br>
 
 Іноді клієнти можуть надсилати JSON із менш стандартними заголовками. Наприклад, за специфікацією <strong>JSON:API</strong> використовується <strong>application/vnd.api+json</strong>. У такому випадку потрібно явно вказати додаткові типи:
 
-<em>
-  import express from 'express'; </br>
-   </br>
-  const app = express(); </br>
-   </br>
-  app.use(express.json({ </br>
-  type: ['application/json', 'application/vnd.api+json'], </br>
-  })); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import express from 'express'; </br>
+     </br>
+    const app = express(); </br>
+     </br>
+    app.use(express.json({ </br>
+    type: ['application/json', 'application/vnd.api+json'], </br>
+    })); </br>
+  </em>
+</div>
  </br>
 
 ## Обмеження розміру тіла
 
 Щоб захистити сервер від занадто великих запитів (наприклад, якщо користувач випадково чи навмисно надсилає дуже великий об’єкт), можна задати ліміт на розмір тіла.
 
-<em>
-  import express from 'express'; </br>
-   </br>
-  const app = express(); </br>
-   </br>
-  app.use(express.json({ </br>
-  limit: '100kb', // максимум 100 кілобайт </br>
-  })); </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    import express from 'express'; </br>
+     </br>
+    const app = express(); </br>
+     </br>
+    app.use(express.json({ </br>
+    limit: '100kb', // максимум 100 кілобайт </br>
+    })); </br>
+  </em>
+</div>
  </br>
 У разі перевищення ліміту запит буде відхилений із помилкою.
 
@@ -2338,33 +2419,37 @@ src/ </br>
 
 Дописуємо контролер у файл src/controllers/studentsController.js. Він читає дані з req.body і створює документ через <strong>Student.create(...)</strong>. Для запитів, які щось створюють, семантично правильно відправляти відповідь зі статус-кодом 201 Created.
 
-<em>
-  // src/controllers/studentsController.js </br>
-   </br>
-  import { Student } from '../models/student.js'; </br>
-   </br>
-  // Решта контролерів </br>
-   </br>
-  // Новий контролер </br>
-  export const createStudent = async (req, res) => { </br>
-  const student = await Student.create(req.body); </br>
-  res.status(201).json(student); </br>
-  }; </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // src/controllers/studentsController.js </br>
+     </br>
+    import { Student } from '../models/student.js'; </br>
+     </br>
+    // Решта контролерів </br>
+     </br>
+    // Новий контролер </br>
+    export const createStudent = async (req, res) => { </br>
+    const student = await Student.create(req.body); </br>
+    res.status(201).json(student); </br>
+    }; </br>
+  </em>
+</div>
  </br>
 Перший аргумент для Student.create() обов’язковий і має містити об'єкт даних, які будуть використані для створення нового документа у колекції. База даних створює новий документ, додає до нього унікальний ідентифікатор та повертає створений об’єкт.
 
 Очікуваний приклад тіла запиту (поля мають відповідати нашій схемі Student):
 
-<em>
-  { </br>
-  "name": "John Doe", </br>
-  "age": 18, </br>
-  "gender": "male", </br>
-  "avgMark": 10.3, </br>
-  "onDuty": true </br>
-  } </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    { </br>
+    "name": "John Doe", </br>
+    "age": 18, </br>
+    "gender": "male", </br>
+    "avgMark": 10.3, </br>
+    "onDuty": true </br>
+    } </br>
+  </em>
+</div>
  </br>
 Якщо тіло не відповідає схемі (наприклад, бракує обов’язкових полів або неправильні типи), Mongoose згенерує базову помилку валідації. Такі помилки автоматично підуть у наш errorHandler.
 
@@ -2373,7 +2458,7 @@ src/ </br>
 Підключаємо контролер у маршрутизатор студентів:
 
 <em>
-  <details>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -2427,7 +2512,7 @@ src/ </br>
 У контролері отримуємо studentId із параметрів, видаляємо студента через Mongoose-метод findOneAndDelete, і якщо такого не існує — повертаємо помилку 404. Якщо все добре — повертаємо 200 Success.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/controllers/studentsController.js </br>
        </br>
@@ -2459,7 +2544,7 @@ src/ </br>
 Додаємо DELETE-роут /students/:studentId та підключаємо контролер:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -2522,7 +2607,7 @@ src/ </br>
 У контролері беремо studentId з параметрів, req.body — дані для часткового оновлення. Якщо студента не знайдено — повертаємо 404. Якщо все добре — повертаємо 200 і оновлений документ.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/controllers/studentsController.js </br>
        </br>
@@ -2554,23 +2639,25 @@ src/ </br>
 У тілі запиту будемо очікувати частковий об’єкт даних для оновлення студента з наступними властивостями:
 
   </br>
-<em>
-  { </br>
-  "name": "John Doe", </br>
-  "email": "jojndoe@mail.com", </br>
-  "age": 18, </br>
-  "gender": "male", </br>
-  "avgMark": 10.3, </br>
-  "onDuty": true </br>
-  } </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    { </br>
+    "name": "John Doe", </br>
+    "email": "jojndoe@mail.com", </br>
+    "age": 18, </br>
+    "gender": "male", </br>
+    "avgMark": 10.3, </br>
+    "onDuty": true </br>
+    } </br>
+  </em>
+</div>
  </br>
 Роут
 
 Підключаємо контролер у маршрутизатор студентів:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -2604,12 +2691,14 @@ src/ </br>
 - URL: http://localhost:3000/students/:studentId
 - Body (raw, JSON), наприклад:</br>
 
-  <em>
-  { </br>
-  "avgMark": 9.8, </br>
-  "onDuty": false </br>
-  } </br>
-  </em>
+  <div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+    <em>
+    { </br>
+    "avgMark": 9.8, </br>
+    "onDuty": false </br>
+    } </br>
+    </em>
+  </div>
   </br>
   У разі успіху отримаємо відповідь 200 Success з оновленим об’єктом студента. Якщо такого id немає — повернеться 404 Not Found.
 
@@ -2643,7 +2732,7 @@ src/ </br>
 Приклад схеми для перевірки тіла запиту під час створення нового студента:
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       import { Joi } from 'celebrate'; </br>
        </br>
@@ -2667,7 +2756,7 @@ src/ </br>
 Ось так виглядає схема для валідації тіла запиту:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/validations/studentsValidation.js </br>
        </br>
@@ -2698,13 +2787,15 @@ src/ </br>
 
 Наприклад, валідація параметра маршруту /notes/:category, де category — динамічний параметр:</br>
 
-<em>
-{ </br>
-[Segments.PARAMS]: Joi.object({ </br>
-category: Joi.string().valid('work', 'study', 'personal').required(), </br>
-}) </br>
-} </br>
-</em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+  { </br>
+  [Segments.PARAMS]: Joi.object({ </br>
+  category: Joi.string().valid('work', 'study', 'personal').required(), </br>
+  }) </br>
+  } </br>
+  </em>
+</div>
 </br>
 У цьому випадку валідуються параметри маршруту, а саме :category.
 
@@ -2720,7 +2811,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Ми можемо налаштовувати повідомлення через метод <strong>.messages()</strong>:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/validations/studentsValidation.js </br>
        </br>
@@ -2791,7 +2882,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Тепер підключимо схему у маршруті POST /students, щоб валідація виконувалась автоматично до контролера:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
   <summary>
       // src/routes/studentsRoutes.js </br>
       </br>
@@ -2817,7 +2908,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 
 У прикладі вище:
 
-- <em>router.post('/students', celebrate(createStudentSchema), createStudent);</em>
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">router.post('/students', celebrate(createStudentSchema), createStudent);</em>
 
 - Спочатку виконується celebrate. Він бере дані з req.body і перевіряє їх за схемою.
 - Якщо дані невалідні — повертається помилка 400 Bad Request, і контролер не запускається.
@@ -2836,7 +2927,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Це потрібно для того, щоб спочатку відловлювались помилки валідації celebrate, а вже потім — усі інші.
 
 <em>
- <details>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/server.js </br>
        </br>
@@ -2911,7 +3002,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Створимо кастомний валідатор для Joi, який перевірятиме значення на валідність ObjectId.
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/validations/studentsValidation.js </br>
        </br>
@@ -2944,7 +3035,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Додамо схему у маршрут /students/:studentId, щоб celebrate автоматично перевіряв параметр studentId:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -2994,7 +3085,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Створимо схему, яка перевірятиме одночасно і params, і body:
 
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/validations/studentsValidation.js </br>
        </br>
@@ -3025,7 +3116,7 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 Тепер використаємо цю схему у маршруті PATCH /students/:studentId:</br>
 </br>
 <em>
-<details>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
    <summary>
       // src/routes/studentsRoutes.js </br>
        </br>
@@ -3046,6 +3137,738 @@ category: Joi.string().valid('work', 'study', 'personal').required(), </br>
 - Якщо studentId невалідний → повертається 400 Bad Request з повідомленням "Invalid id format".
 - Якщо тіло запиту порожнє → повертається 400 Bad Request з повідомленням від Joi.
 - Якщо дані валідні → виконується контролер updateStudent.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Створення пагінації</summary>
+
+# Створення пагінації
+
+Додаємо пагінацію до маршруту отримання всіх студентів GET /students. Ми очікуємо, що клієнт може передати у рядку запиту параметри page та perPage.
+
+- /students?page=1&perPage=15
+
+Це означає: "поверни мені першу сторінку з 15 студентів".
+
+## Валідація параметрів
+
+Щоб запити були коректними, одразу додамо валідацію через Joi і celebrate. Для валідації параметрів рядка запиту описуємо схему в Segments.QUERY.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from "celebrate"; </br>
+       </br>
+      export const getStudentsSchema = { </br>
+   </summary>
+    [Segments.QUERY]: Joi.object({ </br>
+    page: Joi.number().integer().min(1).default(1), </br>
+    perPage: Joi.number().integer().min(5).max(20).default(10), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Що тут відбувається:
+
+- page — має бути цілим числом, не менше ніж 1. Якщо клієнт не передав значення, воно автоматично дорівнює 1.
+- perPage — кількість студентів на сторінці. Має бути від 5 до 20. Якщо клієнт не вказав, за замовчуванням буде 10.
+- Обидва параметри необов’язкові: якщо їх немає в запиті, ми все одно отримаємо безпечні дефолтні значення.
+
+Додаємо middleware валідації до маршруту:</br>
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+  // src/routes/studentsRoutes.js </br>
+  </br>
+  import { getStudentsSchema } from "../validations/studentsValidation.js"; </br>
+  </br>
+  router.get("/students", celebrate(getStudentsSchema), getStudents); </br>
+  </em>
+</div>
+
+## Контролер із логікою пагінації
+
+Тепер оновимо контролер getStudents, щоб він віддавав студентів частинами.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      //src/controllers/studentsController.js </br>
+       </br>
+      import { Student } from "../models/student.js"; </br>
+       </br>
+      export const getStudents = async (req, res) => { </br>
+   </summary>
+    // Отримуємо пара метри пагінації </br>
+    const { page = 1, perPage = 10 } = req.query; </br>
+     </br>
+    const skip = (page - 1) \* perPage; </br>
+     </br>
+    // Створюємо базовий запит до колекції </br>
+    const studentsQuery = Student.find(); </br>
+     </br>
+    // Виконуємо одразу два запити паралельно </br>
+    const [totalItems, students] = await Promise.all([ </br>
+    studentsQuery.clone().countDocuments(), </br>
+    studentsQuery.skip(skip).limit(perPage), </br>
+    ]); </br>
+     </br>
+        // Обчислюємо загальну кількість «сторінок» </br>
+     </br>
+    const totalPages = Math.ceil(totalItems / perPage); </br>
+     </br>
+    res.status(200).json({ </br>
+    page, </br>
+    perPage, </br>
+    totalItems, </br>
+    totalPages, </br>
+    students, </br>
+    }); </br>
+    }; </br>
+</details>
+</em>
+ </br>
+У відповіді ми віддаємо не тільки список студентів, але й корисну мета-інформацію:
+
+- на якій сторінці він зараз,
+- скільки студентів показано на сторінці,
+- скільки студентів є загалом,
+- скільки всього сторінок доступно.
+
+## Розбір коду крок за кроком
+
+1. Обчислюємо skip
+
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">const skip = (page - 1) \* perPage;</em>
+
+Це визначає, скільки записів потрібно пропустити перед тим, як відібрати дані для поточної сторінки:
+
+- якщо page = 1 → пропускаємо 0 записів;
+- якщо page = 2 → пропускаємо perPage записів;
+- якщо page = 3 → пропускаємо 2 \* perPage записів.
+  Таким чином ми зсуваємося на потрібну сторінку.
+
+2. Створюємо базовий запит
+
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">const studentsQuery = Student.find();</em>
+
+Тут ми ще не звертаємось до бази, а лише описуємо запит. Це дозволяє згодом «доповнювати» його іншими методами (skip, limit тощо).
+
+3. Виконуємо запити паралельно
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    const [totalItems, students] = await Promise.all([ </br>
+    studentsQuery.clone().countDocuments(), </br>
+    studentsQuery.skip(skip).limit(perPage), </br>
+    ]); </br>
+  </em>
+</div>
+</br>
+- .countDocuments() — підраховує загальну кількість студентів у колекції.
+- .skip(skip).limit(perPage) — повертає тільки ту частину студентів, яка відповідає потрібній сторінці.
+
+Ми запускаємо обидва запити одночасно за допомогою Promise.all. Це економить час, бо замість того, щоб чекати спочатку на один, а потім на інший — вони виконуються паралельно.
+
+4. Чому потрібен <strong>.clone()</strong>
+
+У Mongoose один і той самий запит не можна виконати двічі. Тому перед повторним використанням його потрібно «клонувати». У нашому випадку це потрібно, щоб один раз отримати кількість документів, а другий — самі документи.
+
+5. Обчислюємо кількість сторінок
+
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">const totalPages = Math.ceil(totalItems / perPage);</em>
+
+Наприклад, якщо в колекції є 53 студенти, а на сторінку ми показуємо по 10, отримаємо:
+
+Math.ceil(53 / 10) = 6
+
+Тобто дані займають 6 сторінок.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Фільтрація</summary>
+
+# Фільтрація
+
+Коли ми працюємо з великими наборами даних, важливо мати можливість отримувати не всі документи одразу, а лише ті, які відповідають певним умовам. Це і є фільтрація.
+
+Фільтрація дозволяє:
+
+- обмежувати результати запитів;
+- працювати тільки з потрібними даними;
+- оптимізувати роботу сервера й бази даних.
+
+Як клієнт передає фільтри
+
+Найпоширеніший спосіб — через query parameters в URL.
+
+https://example.com/students?minAge=12&maxAvgMark=10
+
+- символ ? відділяє шлях (/students) від параметрів;
+- параметри передаються у вигляді ключ=значення;
+- кілька параметрів розділяються знаком &.
+
+У цьому прикладі:
+
+- minAge=12 означає, що мінімальний вік студента має бути 12 років;
+- maxAvgMark=10 означає, що середній бал не повинен перевищувати 10.
+
+Фільтрацію варто виконувати саме на рівні бази даних, тобто на бекенді, а не після отримання всіх даних на фронтенді . Це швидше та ефективніше.
+
+## Фільтрація в MongoDB
+
+У MongoDB ми можемо накладати умови за допомогою спеціальних операторів.
+
+Приклад: знайти студентів, у яких середній бал від 10 і вище:
+
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">db.students.find({ avgMark: { $gte: 10 } });</em>
+
+Тут <strong>$gte</strong> означає greater than or equal (більше або дорівнює).
+
+## Основні оператори в Mongoose
+
+У Mongoose ці оператори працюють так само. Ось кілька прикладів:
+
+1. <strong>Рівність ($eq)</strong>
+
+Student.find({ age: { $eq: 9 } });
+
+Знаходимо студентів з віком 9.
+
+2. <strong>Нерівність ($ne)</strong>
+
+Student.find({ avgMark: { $ne: 10 } });
+
+Знаходимо студентів, у яких середній бал не дорівнює 10.
+
+3. <strong>Більше ($gt), Більше або дорівнює ($gte)</strong>
+
+Student.find({ age: { $gt: 8 } });
+
+Знаходимо студентів з віком більше 8.
+
+4. <strong>Менше ($lt), Менше або дорівнює ($lte)</strong>
+
+Student.find({ avgMark: { $lte: 8.5 } });
+
+Знаходимо студентів із середнім балом не вищим за 8.5.
+
+5. <strong>У межах списку ($in)</strong>
+
+Student.find({ gender: { $in: ['male', 'female'] } });
+
+Знаходимо студентів чоловічої або жіночої статі.
+
+6. <strong>Не у списку ($nin)</strong>
+
+Student.find({ gender: { $nin: ['male'] } });
+
+Знаходимо всіх студентів, крім чоловіків.
+
+## Query Builder у Mongoose
+
+У Mongoose є зручний механізм побудови складних запитів — Query Builder. Він дозволяє будувати умови покроково, додаючи фільтри «ланцюжком».
+
+Приклад:
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    await Student.find() </br>
+    .where('age').gte(6).lte(10) // вік від 6 до 10 включно </br>
+    .where('avgMark').gt(7) // середній бал більше 7 </br>
+    .exec(); </br>
+  </em>
+</div>
+</br>
+Що тут відбувається:
+
+- .where('age').gte(6).lte(10) → додаємо умову для віку;
+- .where('avgMark').gt(7) → додаємо умову для середнього балу;
+- .exec() → виконує зібраний запит.
+
+Таким чином, ми отримаємо студентів, яким від 6 до 10 років, і які мають середній бал вище 7.
+
+Завдяки фільтрації ми можемо швидко працювати навіть із великими колекціями, отримуючи лише ті дані, які нам потрібні.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Створення фільтрів</summary>
+
+# Створення фільтрів
+
+Додамо можливість фільтрувати колекцію студентів за статтю (gender) та мінімальним значенням середнього балу (minAvgMark).
+
+Приклад запиту з усіма параметрами:
+
+- /students?page=1&perPage=15&gender=female&minAvgMark=2
+
+## Схема валідації
+
+Спочатку оновимо схему, щоб перевіряти всі можливі query-параметри у маршруті GET /students.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+    <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from "celebrate"; </br>
+       </br>
+      export const getStudentsSchema = { </br>
+    </summary>
+    [Segments.QUERY]: Joi.object({ </br>
+    page: Joi.number().integer().min(1).default(1), </br>
+    perPage: Joi.number().integer().min(5).max(20).default(10), </br>
+    gender: Joi.string().valid("male", "female", "other"), </br>
+    minAvgMark: Joi.number().positive() </br>
+    }) </br>
+    }; </br>
+</details>
+</em>
+ </br>
+- page і perPage — як і раніше, для пагінації;
+- gender — дозволені значення "male", "female", "other";
+- minAvgMark — число більше нуля, для вибору студентів із середнім балом вище заданого.
+
+## Контролер
+
+Тепер у контролері будуємо запит динамічно, враховуючи, які параметри передав користувач.
+
+Модифікуємо код контролера:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const getStudents = async (req, res) => { </br>
+      const { page = 1, perPage = 10, gender, minAvgMark } = req.query; </br>
+      const skip = (page - 1) \* perPage; </br>
+   </summary>
+     </br>
+    const studentsQuery = Student.find(); </br>
+     </br>
+    // Будуємо фільтр </br>
+    if (gender) { </br>
+    studentsQuery.where("gender").equals(gender); </br>
+    } </br>
+    if (minAvgMark) { </br>
+    studentsQuery.where("avgMark").gte(minAvgMark); </br>
+    } </br>
+     </br>
+    const [totalItems, students] = await Promise.all([ </br>
+    studentsQuery.clone().countDocuments(), </br>
+    studentsQuery.skip(skip).limit(perPage), </br>
+    ]); </br>
+     </br>
+    const totalPages = Math.ceil(totalItems / perPage); </br>
+     </br>
+    res.status(200).json({ </br>
+    page, </br>
+    perPage, </br>
+    totalItems, </br>
+    totalPages, </br>
+    students, </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що тут відбувається?
+
+- studentsQuery.where("gender").equals(gender) — додає умову для фільтрації за статтю, якщо параметр переданий.
+- studentsQuery.where("avgMark").gte(minAvgMark) — додає умову для фільтрації за середнім балом (беремо тільки тих, у кого avgMark ≥ minAvgMark).
+- Promise.all([...]) — запускаємо підрахунок (countDocuments) і отримання списку студентів одночасно, щоб не робити два послідовних запити.
+- .clone() — потрібен у Mongoose, щоб один і той самий запит можна було виконати двічі (для підрахунку і для вибірки).
+
+У результаті ми отримуємо список студентів із врахуванням пагінації та фільтрів, а також додаткову інформацію: скільки всього студентів (totalItems) і скільки сторінок (totalPages).
+
+</details>
+</li>
+<li>
+<details>
+<summary>Текстовий пошук</summary>
+
+# Текстовий пошук
+
+Коли в нас є рядкові поля (наприклад, name) і користувач хоче знайти студентів за словами з цих полів (наприклад, search=Anna), зручно робити повнотекстовий пошук. У MongoDB він реалізується оператором <strong>$text</strong>, але працює лише по полях, які входять до текстового індексу.
+
+<strong>Індекс</strong> — це окрема структура даних, яку MongoDB підтримує поруч із колекцією, щоб прискорювати пошук. Для текстового пошуку потрібен текстовий індекс. Без нього запит із $text просто не працюватиме (MongoDB повідомить, що немає відповідного індексу). Може бути лише один текстовий індекс на колекцію, але в нього можна включити декілька полів одразу.
+
+Оператор $text шукає слова, а не частини слова. Anna знайдеться, а Ann — ні. Для часткових збігів використовується <strong>$regex</strong>.
+Додаємо текстовий індекс до моделі Student
+
+Ми хочемо шукати студентів за іменем, тому додамо індекс на поле name.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <summary>
+      // src/models/student.js </br>
+      import { Schema, model } from "mongoose"; </br>
+       </br>
+      // Решта коду файла </br>
+  </summary>
+     </br>
+    // Додаємо текстовий індекс: кажемо MongoDB, що по полю name можна робити $text </br>
+    studentSchema.index({ name: "text" }); </br>
+     </br>
+    export const Student = model("Student", studentSchema); </br>
+</details>
+</em>
+ </br>
+Так індекс стає частиною коду й буде однаково створений на будь-якому середовищі (локальному, staging, production).
+
+## Синхронізація індексу з базою
+
+Після зміни схеми Mongoose ще не створює індекс автоматично. Щоб MongoDB додала його в колекцію, потрібно один раз після підключення виконати:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/db/connectMongoDB.js </br>
+       </br>
+      import mongoose from "mongoose"; </br>
+      import { Student } from "../models/student.js"; </br>
+   </summary>
+     </br>
+    export const connectMongoDB = async () => { </br>
+    try { </br>
+    const mongoUrl = process.env.MONGO_URL; </br>
+    await mongoose.connect(mongoUrl); </br>
+    console.log("✅ MongoDB connection established successfully"); </br>
+     </br>
+        // Гарантуємо, що індекси в БД відповідають схемі </br>
+        await Student.syncIndexes(); </br>
+        console.log("Indexes synced successfully"); </br>
+     </br>
+    } catch (error) { </br>
+    console.error("❌ Failed to connect to MongoDB:", error.message); </br>
+    process.exit(1); </br>
+    } </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Ця команда перевірить, чи індекс уже існує, і створить його, якщо ні.
+
+## Доповнюємо код контролера
+
+Отримуємо новий параметр search із req.query і додаємо до запиту пошуку студентів ще одну умову з використанням $text через той самий ланцюжок studentsQuery.where().
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      import { Student } from "../models/student.js"; </br>
+       </br>
+      export const getStudents = async (req, res) => { </br>
+      // Отримуємо параметри запиту </br>
+   </summary>
+    const { page = 1, perPage = 10, gender, minAvgMark, search } = req.query; </br>
+    const skip = (page - 1) \* perPage; </br>
+     </br>
+    // Створюємо базовий запит </br>
+    const studentsQuery = Student.find(); </br>
+     </br>
+    // Текстовий пошук по name (працює лише якщо створено текстовий індекс) </br>
+    if (search) { </br>
+    studentsQuery.where({ </br>
+    $text: { $search: search } </br>
+    }); </br>
+    } </br>
+     </br>
+    // Фільтр за статтю </br>
+    if (gender) { </br>
+    studentsQuery.where("gender").equals(gender); </br>
+    } </br>
+     </br>
+    // Фільтр за середнім балом </br>
+    if (minAvgMark) { </br>
+    studentsQuery.where("avgMark").gte(minAvgMark); </br>
+    } </br>
+     </br>
+    const [totalItems, students] = await Promise.all([ </br>
+    studentsQuery.clone().countDocuments(), </br>
+    studentsQuery.skip(skip).limit(perPage), </br>
+    ]); </br>
+     </br>
+    const totalPages = Math.ceil(totalItems / perPage); </br>
+     </br>
+    res.status(200).json({ </br>
+    page, </br>
+    perPage, </br>
+    totalItems, </br>
+    totalPages, </br>
+    students, </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Не забуваємо валідацію параметра search:</br>
+</br>
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from "celebrate"; </br>
+       </br>
+      export const getStudentsSchema = { </br>
+      [Segments.QUERY]: Joi.object({ </br>
+   </summary>
+    page: Joi.number().integer().min(1).default(1), </br>
+    perPage: Joi.number().integer().min(5).max(20).default(10), </br>
+    gender: Joi.string().valid("male", "female", "other"), </br>
+    minAvgMark: Joi.number().positive(), </br>
+    search: Joi.string().trim().allow('') </br>
+    }) </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Після цього можна передавати текст для пошуку, і все працюватиме.
+
+## Типові помилки та як їх уникнути
+
+- Забули додати індекс у схему → $text не працює.
+- Не викликали syncIndexes() після зміни схеми → у БД індексу все ще немає.
+- Очікуєте, що $text знайде підрядок → він працює тільки по цілих словах.
+
+## Додаткові налаштування індексів
+
+При створенні індексу у функцію index можна передати додаткові налаштування як другий аргумент. Наприклад:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/models/student.js </br>
+       </br>
+      import { Schema, model } from "mongoose"; </br>
+       </br>
+      // Решта коду файла </br>
+   </summary>
+     </br>
+    // Додаємо текстовий індекс: кажемо MongoDB, що по полю name можна робити $text </br>
+    studentSchema.index( </br>
+    { name: "text" }, </br>
+    { </br>
+    name: "StudentTextIndex", </br>
+    weights: { name: 10 }, </br>
+    default_language: "english", </br>
+    } </br>
+    ); </br>
+     </br>
+    export const Student = model("Student", studentSchema); </br>
+</details>
+</em>
+ </br>
+<strong>name</strong>
+
+Це назва індексу в базі даних, а не поле колекції. MongoDB зазвичай створює автоматичну назву типу "name_text", але краще дати свою — наприклад, "StudentTextIndex". Це зручно, якщо потім потрібно буде переглянути список індексів у Compass.
+
+<strong>weights</strong>
+
+Використовується, коли текстовий індекс створюється на кілька полів одночасно. Кожному полю можна задати вагу (пріоритет) для розрахунку релевантності під час пошуку.
+
+Наприклад:
+
+- weights: { name: 10, gender: 2 }
+
+У цьому випадку збіги в полі name будуть важливішими, ніж у gender. У нашому прикладі лише одне поле (name), тому вага 10 — просто приклад, який показує, як це робиться.
+
+<strong>default_language</strong>
+
+MongoDB під час пошуку намагається «розуміти» мову тексту:
+
+- ігнорує стоп-слова (the, and, is тощо);
+- приводить слова до основи (наприклад, run, running, runs → run).
+- Це відбувається відповідно до мови, вказаної в default_language.
+
+Якщо встановити "english", MongoDB застосовуватиме англійські правила стемінгу.
+
+Якщо текст не англійський (наприклад, імена чи українські слова), це не завадить — просто частина лінгвістичної обробки не спрацює.
+
+## Пошук через регулярні вирази з $regex
+
+MongoDB підтримує два способи пошуку тексту: через <strong>$text</strong> і через <strong>$regex</strong>. Вони вирішують схожі завдання, але працюють по-різному.
+
+<strong>Оператор $text</strong>
+
+- Працює через текстовий індекс, тому швидкий навіть на великих колекціях.
+- Шукає цілі слова, а не частини.
+- Використовується, коли пошук має бути точним — наприклад, за іменем чи назвою.
+- Підтримує мовний аналіз (ігнорує стоп-слова, розпізнає форми слів).
+- // знайде студентів, у яких слово "Anna" є в полі name
+- studentsQuery.where({ $text: { $search: "Anna" } });
+
+$text не знайде частину слова. Наприклад, "Ann" не знайде "Anna".
+
+<strong>Оператор $regex</strong>
+
+- Використовується для пошуку частини слова або шаблону.
+  Не потребує індексу, але через це повільніший, бо перевіряє кожен документ.
+- Має опції — наприклад, "i" для ігнорування регістру.
+- studentsQuery.where({
+  name: { $regex: search, $options: "i" },
+  });
+
+Тут:
+
+- search — це текст із параметра запиту (?search=ann);
+- $regex означає «знайди підрядок у полі name»;
+- $options: "i" робить пошук нечутливим до великих/малих літер (Ann, ann, ANN знайдуться).
+
+На практиці колекції даних часто містять тисячі або мільйони документів, тому пошук через $regex виконується відчутно повільніше, адже база даних змушена повністю перебирати колекцію без використання індексу. Для повнотекстового пошуку доцільніше застосовувати індекси та оператор $text.
+
+</details>
+</li>
+
+<li>
+<details>
+<summary>Сортування</summary>
+
+# Сортування
+
+Сортування даних — одна з базових операцій у будь-якому застосунку. Воно дозволяє впорядкувати записи в певному порядку: наприклад, показати студентів від наймолодших до найстарших, або відсортувати за середнім балом.
+
+## Основні принципи сортування
+
+Поле сортування — визначає, за яким атрибутом (полем) проводиться сортування. У нашому випадку це можуть бути name, age, avgMark.
+Порядок сортування — напрямок:
+
+- зростання (ASC / ascending / 1) — від меншого до більшого;
+- спадання (DESC / descending / -1) — від більшого до меншого.
+
+Сортування краще виконувати безпосередньо у базі даних, а не в коді фронтенда. Mongoose (і MongoDB під капотом) має оптимізовані методи для цього, тому результат буде швидший і ефективніший.
+
+## Синтаксис у Mongoose
+
+Метод <strong>sort()</strong> у Mongoose дозволяє вказати кілька полів і напрямків сортування.
+
+<em style="background: #383737ff; border-radius: 8px; padding-left: 10px;">Model.find().sort({ field1: direction1, field2: direction2 });</em>
+
+- field1, field2 — назви полів, за якими проводиться сортування;
+- direction1, direction2 — напрямок сортування.
+
+Варіанти напрямків:
+
+- 1, "asc", "ascending" → сортування за зростанням (від меншого до більшого);
+- 1, "desc", "descending" → сортування за спаданням (від більшого до меншого).
+
+Приклади:
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+  <em>
+    // За віком зростанням </br>
+    Student.find().sort({ age: 1 }); </br>
+     </br>
+    // За середнім балом спаданням </br>
+    Student.find().sort({ avgMark: "desc" }); </br>
+     </br>
+    // Комбіноване сортування: спочатку за gender зростанням, потім за age спаданням </br>
+    Student.find().sort({ gender: "asc", age: -1 }); </br>
+  </em>
+</div>
+
+## Додаємо сортування у нашому застосунку
+
+Ми реалізуємо сортування для маршруту GET /students. Клієнт може передати параметри sortBy (поле для сортування) і sortOrder (порядок). Якщо параметри не передані — застосовується сортування за замовчуванням по \_id.
+
+Валідація параметрів:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/validations/studentsValidation.js </br>
+       </br>
+      import { Joi, Segments } from "celebrate"; </br>
+       </br>
+      export const getStudentsSchema = { </br>
+   </summary>
+    [Segments.QUERY]: Joi.object({ </br>
+    page: Joi.number().integer().min(1).default(1), </br>
+    perPage: Joi.number().integer().min(5).max(20).default(10), </br>
+    gender: Joi.string().valid("male", "female", "other"), </br>
+    minAvgMark: Joi.number().positive(), </br>
+    sortBy: Joi.string().valid("\_id", "name", "age", "avgMark").default("\_id"), </br>
+    sortOrder: Joi.string().valid("asc", "desc").default("asc"), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+- sortBy → поле для сортування (\_id, name, age, avgMark);
+- sortOrder → напрямок (asc або desc), за замовчуванням "asc".
+
+Контролер з урахуванням сортування.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const getStudents = async (req, res) => { </br>
+      const { </br>
+      page = 1, </br>
+      perPage = 10, </br>
+   </summary>
+    gender, </br>
+    minAvgMark, </br>
+    // Отримуємо значення параметрів сортування </br>
+    // дефолтне сортування по \_id </br>
+    sortBy = "\_id", </br>
+    sortOrder = "asc", </br>
+    } = req.query; </br>
+     </br>
+    const skip = (page - 1) \* perPage; </br>
+     </br>
+    const studentsQuery = Student.find(); </br>
+     </br>
+    // Фільтрація </br>
+    if (gender) { </br>
+    studentsQuery.where("gender").equals(gender); </br>
+    } </br>
+    if (minAvgMark) { </br>
+    studentsQuery.where("avgMark").gte(minAvgMark); </br>
+    } </br>
+     </br>
+    // Пагінація + сортування </br>
+    const [totalItems, students] = await Promise.all([ </br>
+    studentsQuery.clone().countDocuments(), </br>
+    studentsQuery </br>
+    .skip(skip) </br>
+    .limit(perPage) </br>
+    // Додамєдо сортування в ланцюжок методів квері </br>
+    .sort({ [sortBy]: sortOrder }), </br>
+    ]); </br>
+     </br>
+    const totalPages = Math.ceil(totalItems / perPage); </br>
+     </br>
+    res.status(200).json({ </br>
+    page, </br>
+    perPage, </br>
+    totalItems, </br>
+    totalPages, </br>
+    students, </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Якщо клієнт не передає параметри → студенти повертаються відсортованими по \_id у зростаючому порядку.
+Якщо клієнт вкаже ?sortBy=age&sortOrder=desc → дані будуть відсортовані за віком у зворотному порядку.
+
+Таким чином ми отримуємо гнучке API, яке дозволяє одночасно поєднувати фільтрацію, пагінацію та сортування.
 
 </details>
 </li>
