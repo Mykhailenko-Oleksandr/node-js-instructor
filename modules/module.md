@@ -3874,3 +3874,1315 @@ $text не знайде частину слова. Наприклад, "Ann" н�
 </li>
 </ul>
 </details>
+
+<details>
+<summary>Module 4</summary>
+<ul>
+<li>
+<details>
+<summary>Реєстрація користувачів</summary>
+
+# Реєстрація користувачів
+
+Будь-яка робота з аутентифікацією та авторизацією починається з реєстрації користувачів. Користувач — це окрема сутність у нашому додатку, тому спочатку потрібно створити для нього модель.
+
+## Модель користувача
+
+Ми використовуємо email як унікальний ідентифікатор користувача. Тому додаємо до цього поля <strong>unique: true</strong>.
+<em>
+
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/models/user.js </br>
+       </br>
+      import { model, Schema } from 'mongoose'; </br>
+       </br>
+      const userSchema = new Schema( </br>
+      { </br>
+   </summary>
+    username: { </br>
+    type: String, </br>
+    trim: true, </br>
+    }, </br>
+    email: { </br>
+    type: String, </br>
+    unique: true, </br>
+    required: true, </br>
+    trim: true, </br>
+    }, </br>
+    password: { </br>
+    type: String, </br>
+    required: true, </br>
+    }, </br>
+    }, </br>
+    { timestamps: true, versionKey: false } </br>
+    ); </br>
+     </br>
+    userSchema.pre('save', function (next) { </br>
+    if (!this.username) { </br>
+    this.username = this.email; </br>
+    } </br>
+    next(); </br>
+    }); </br>
+     </br>
+    export const User = model('User', userSchema); </br>
+</details>
+</em>
+ </br>
+<srtong>username</srtong> — необов’язкове поле. За замовчуванням воно дорівнює email користувача. У майбутньому користувач зможе змінити ім’я у профілі.
+Для цього ми використовуємо pre-hook <strong>Schema.pre("save")</strong>, який виконується перед збереженням користувача.
+Оскільки ми використовуємо this (посилання на поточний документ), функція не може бути стрілковою.
+
+## Видалення паролю з відповіді
+
+Пароль зберігається в базі, але повертати його клієнту небезпечно. Ми можемо видаляти його автоматично з будь-якої відповіді, перевизначивши метод <strong>toJSON()</strong>.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/models/user.js </br>
+       </br>
+      import { model, Schema } from 'mongoose'; </br>
+       </br>
+      const userSchema = new Schema( </br>
+      { </br>
+   </summary>
+    username: { </br>
+    type: String, </br>
+    trim: true, </br>
+    }, </br>
+    email: { </br>
+    type: String, </br>
+    unique: true, </br>
+    required: true, </br>
+    trim: true, </br>
+    }, </br>
+    password: { </br>
+    type: String, </br>
+    required: true, </br>
+    }, </br>
+    }, </br>
+    { timestamps: true, versionKey: false } </br>
+    ); </br>
+     </br>
+    userSchema.pre('save', function (next) { </br>
+    if (!this.username) { </br>
+    this.username = this.email; </br>
+    } </br>
+    next(); </br>
+    }); </br>
+     </br>
+    // Перевизначаємо метод toJSON </br>
+    userSchema.methods.toJSON = function () { </br>
+    const obj = this.toObject(); </br>
+    delete obj.password; </br>
+    return obj; </br>
+    }; </br>
+     </br>
+    export const User = model('User', userSchema); </br>
+ </details>
+</em>
+ </br>
+Тепер, коли ми відправляємо користувача через res.json(), поле password автоматично видаляється.
+
+## Схема валідації
+
+Реєстрація відбувається через POST /auth/register. Дані приходять у тілі запиту, тому створимо схему для валідації.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/validations/authValidation.js </br>
+       </br>
+      import { Joi, Segments } from 'celebrate'; </br>
+       </br>
+      export const registerUserSchema = { </br>
+   </summary>
+    [Segments.BODY]: Joi.object({ </br>
+    email: Joi.string().email().required(), </br>
+    password: Joi.string().min(8).required(), </br>
+    }), </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+
+- email — повинен бути валідним email і обов’язковим;
+- password — мінімум 8 символів.
+
+## Контролер та маршрут
+
+Контролер для реєстрації:
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      import createHttpError from 'http-errors'; </br>
+      import { User } from '../models/user.js'; </br>
+   </summary>
+     </br>
+    export const registerUser = async (req, res, next) => { </br>
+    const { email, password } = req.body; </br>
+     </br>
+    const existingUser = await User.findOne({ email }); </br>
+    if (existingUser) { </br>
+    return next(createHttpError(400, 'Email in use')); </br>
+    } </br>
+     </br>
+    // Тут далі будемо додавати логіку створення користувача </br>
+    // Поки що відповідаємо порожнім об'єктом </br>
+    res.status(201).json({}); </br>
+    }; </br>
+  </details>
+</em>
+ </br>
+
+- Спочатку шукаємо користувача з таким email.
+- Якщо він існує → повертаємо помилку 400 Bad Request з повідомленням Email in use.
+- Якщо ні → готуємося створювати користувача (логіку додамо пізніше).
+
+Маршрут для реєстрації:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/routes/authRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+   </summary>
+    import { registerUser } from '../controllers/authController.js'; </br>
+    import { registerUserSchema } from '../validations/authValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.post('/auth/register', celebrate(registerUserSchema), registerUser); </br>
+     </br>
+    export default router; </br>
+</details>
+</em>
+ </br>
+І підключаємо новий роут у сервері:</br>
+</br>
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/server.js </br>
+       </br>
+      /_ Інший код з файлу _/ </br>
+       </br>
+      import authRoutes from './routes/authRoutes.js'; </br>
+   </summary>
+    import studentsRoutes from './routes/studentsRoutes.js'; </br>
+     </br>
+    app.use(authRoutes); </br>
+    app.use(studentsRoutes); </br>
+ </details>
+</em>
+ </br>
+Таким чином, ми створили модель користувача, налаштували валідацію для реєстрації та підключили маршрут POST /auth/register. Наступний крок — реалізація логіки створення користувача та хешування паролю.
+
+</details>
+</li>
+
+<li>
+<details>
+<summary>Хешування паролів</summary>
+
+# Хешування паролів
+
+На цьому етапі наш додаток зберігав би паролі у відкритому вигляді (plain text). Це небезпечна практика, адже більшість людей використовують одні й ті ж паролі у різних сервісах. Якщо дані з нашої бази потраплять у руки зловмисників, вони зможуть отримати доступ і до інших акаунтів користувача.
+
+Щоб цього уникнути, застосовують хешування.
+
+Що таке хешування?
+
+<strong>Хешування</strong> — це процес перетворення даних довільної довжини у рядок фіксованої довжини, який називається хешем.
+
+Головні властивості хеш-функцій:
+
+- Фіксована довжина виходу: незалежно від розміру паролю, хеш завжди матиме однакову довжину.
+- Унікальність: для різних вхідних даних повинні утворюватися різні хеш-значення.
+- Односторонність: неможливо (або надзвичайно складно) відновити початковий пароль із хешу.
+- Чутливість до змін: найменша зміна у паролі повинна призводити до абсолютно іншого хешу.
+- Зручність для зберігання: хеш набагато легше зберігати, ніж сам пароль, оскільки це коротший і стандартизований рядок.
+
+У бекенд-розробці хешування застосовують, щоб зберігати не сам пароль, а його хеш. При вході користувача пароль знову хешується, і система порівнює хеші. Якщо вони співпадають — пароль правильний.
+
+## Використання bcrypt
+
+У Node.js найчастіше застосовують бібліотеку bcrypt, яка спеціально створена для безпечного хешування паролів. Вона додає до паролю сіль (salt) — випадковий рядок, що робить хеш унікальним навіть для однакових паролів.
+
+Встановлюємо пакет:
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm i bcrypt</em>
+
+## Реалізація в контролері
+
+Додаємо хешування у функцію реєстрації користувачів:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      import bcrypt from "bcrypt"; </br>
+      import createHttpError from "http-errors"; </br>
+      import { User } from "../models/user.js"; </br>
+   </summary>
+     </br>
+    export const registerUser = async (req, res, next) => { </br>
+    const { email, password } = req.body; </br>
+     </br>
+    const existingUser = await User.findOne({ email }); </br>
+    if (existingUser) { </br>
+    return next(createHttpError(400, 'Email in use')); </br>
+    } </br>
+     </br>
+    // Хешуємо пароль </br>
+    const hashedPassword = await bcrypt.hash(password, 10); </br>
+     </br>
+    // Створюємо користувача </br>
+    const newUser = await User.create({ </br>
+    email, </br>
+    password: hashedPassword, </br>
+    }); </br>
+     </br>
+    // Відправляємо дані користувача (без пароля) у відповіді </br>
+    res.status(201).json(newUser); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що тут відбувається:
+
+- Перевірка на унікальність email: якщо такий користувач уже існує — повертаємо помилку.
+- Хешування паролю: <srtong>bcrypt.hash(password, 10)</srtong> — другий аргумент 10 означає кількість раундів "соління". - Чим більше число, тим безпечніше, але тим довше триває обчислення.
+- Створення користувача: у базу записуємо email і вже хешований пароль.
+- Відповідь клієнту: завдяки перевизначенню toJSON() у моделі, пароль не потрапляє у відповідь.
+
+Таким чином ми зробили зберігання паролів у базі даних безпечним. Наступний крок — навчитися перевіряти паролі під час логіну, використовуючи метод <strong>bcrypt.compare()</strong>.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Логін користувачів</summary>
+
+# Логін користувачів
+
+Переходимо до логіну. Логін дуже схожий на реєстрацію, але замість створення нового користувача ми:
+
+- шукаємо існуючого користувача за email
+- порівнюємо введений пароль із хешем у базі
+- повертаємо відповідь у разі успіху або помилку — у разі невдачі
+
+## Схема валідації
+
+Спочатку описуємо валідацію тіла запиту: потрібні валідний email і пароль.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/validations/authValidation.js </br>
+       </br>
+      import { Joi, Segments } from 'celebrate'; </br>
+       </br>
+      // Решта коду файла </br>
+   </summary>
+     </br>
+    export const loginUserSchema = { </br>
+    [Segments.BODY]: Joi.object({ </br>
+    email: Joi.string().email().required(), </br>
+    password: Joi.string().required(), </br>
+    }), </br>
+    }; </br>
+ </details>
+</em>
+
+## Контролер логіну
+
+У контролері перевіряємо наявність користувача та звіряємо пароль через bcrypt.compare. Якщо щось не так — віддаємо 401 Unauthorized.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      export const loginUser = async (req, res, next) => { </br>
+      const { email, password } = req.body; </br>
+   </summary>
+     </br>
+    // Перевіряємо чи користувач з такою поштою існує </br>
+    const user = await User.findOne({ email }); </br>
+    if (!user) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    // Порівнюємо хеші паролів </br>
+    const isValidPassword = await bcrypt.compare(password, user.password); </br>
+    if (!isValidPassword) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    res.status(200).json(user); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Ключові моменти:
+
+- <strong>bcrypt.compare(password, user.password)</strong> безпечно порівнює введений пароль із хешем у базі.
+- Статус 401 означає, що облікові дані недійсні (немає користувача або пароль хибний).
+
+## Маршрут логіну
+
+Підключаємо валідатор і контролер до маршруту.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <summary>
+      // src/routes/authRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+      import { loginUser, registerUser } from '../controllers/authController.js'; </br>
+  </summary>
+    import { loginUserSchema, registerUserSchema } from '../validations/authValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.post('/auth/register', celebrate(registerUserSchema), registerUser); </br>
+    router.post('/auth/login', celebrate(loginUserSchema), loginUser); </br>
+     </br>
+    export default router; </br>
+</details>
+</em>
+ </br>
+Підсумок:
+
+- Валідатор відсікає некоректні запити ще до контролера.
+- Контролер перевіряє існування користувача і правильність пароля.
+- Успішний логін повертає користувача (без поля password, завдяки перевизначенню toJSON() у моделі).
+
+</details>
+</li>
+<li>
+<details>
+<summary>Cесії</summary>
+
+# Сесії
+
+Аутентифікація в нашому застосунку базується на сесіях.
+
+<strong>Сесія</strong> — це спосіб «пам’ятати» стан між запитами браузера і сервера. Завдяки сесіям ми можемо зберігати інформацію про авторизованого користувача і не змушувати його вводити пароль на кожній сторінці.
+
+Ключові ідеї сесій:
+
+- Ідентифікатор сесії (Session ID): унікальний ключ, що пов’язує клієнта з даними сесії. Зазвичай передається у cookies або, рідше, у URL.
+- Дані сесії: зберігаються на сервері. У нашому випадку — це насамперед токени для доступу. У сесію не варто класти те, втрата чого критична.
+- Термін дії: у сесій є час життя. Після нього дані стають недійсними.
+- Безпека: важливо захищати ідентифікатор сесії (cookie-налаштування, HTTPS тощо).
+- Ролі клієнт/сервер: клієнт зберігає лише ідентифікатор, сервер — самі дані.
+
+## Модель сесії
+
+Ми зберігаємо сесію в колекції sessions. Вона містить токени та їх строки дії, а також посилання на користувача.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/models/session.js </br>
+       </br>
+      import { model, Schema } from 'mongoose'; </br>
+       </br>
+      const sessionSchema = new Schema( </br>
+    </summary>
+    { </br>
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, </br>
+    accessToken: { type: String, required: true }, </br>
+    refreshToken: { type: String, required: true }, </br>
+    accessTokenValidUntil: { type: Date, required: true }, </br>
+    refreshTokenValidUntil: { type: Date, required: true }, </br>
+    }, </br>
+    { timestamps: true, versionKey: false }, </br>
+    ); </br>
+     </br>
+    export const Session = model('Session', sessionSchema); </br>
+ </details>
+</em>
+ </br>
+Що зберігаємо:
+
+- accessToken — короткоживучий токен (у нас 15 хвилин).
+- accessTokenValidUntil — коли accessToken спливає.
+- refreshToken — довшоживучий токен (у нас 1 день), щоб оновити пару токенів.
+- refreshTokenValidUntil — коли refreshToken спливає.
+- userId — власник сесії.
+
+## Константи часу
+
+Щоб не дублювати «магічні числа», винесемо тривалість у константи.
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <em >
+    // src/constants/time.js </br>
+     </br>
+    export const FIFTEEN_MINUTES = 15 _ 60 _ 1000; </br>
+    export const ONE_DAY = 24 _ 60 _ 60 \* 1000; </br>
+  </em>
+</div>
+
+## Створення сесії
+
+Генеруємо пару токенів і строки їх дії в окремому сервісі. Це зручно перевикористовувати в реєстрації, логіні та оновленні сесії.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <summary>
+      // src/services/auth.js </br>
+       </br>
+      import crypto from 'crypto'; </br>
+      import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/time.js'; </br>
+      import { Session } from '../models/session.js'; </br>
+  </summary>
+     </br>
+    export const createSession = async (userId) => { </br>
+    const accessToken = crypto.randomBytes(30).toString('base64'); </br>
+    const refreshToken = crypto.randomBytes(30).toString('base64'); </br>
+     </br>
+    return Session.create({ </br>
+    userId, </br>
+    accessToken, </br>
+    refreshToken, </br>
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES), </br>
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY), </br>
+    }); </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Пояснення:
+
+- crypto.randomBytes(30) генерує криптографічно стійку випадкову послідовність, яку ми кодуємо в base64.
+- accessToken живе недовго — це зменшує ризики у випадку витоку.
+- refreshToken живе довше та використовується для отримання нової пари токенів.
+
+## Використання в контролерах
+
+Після реєстрації створюємо нову сесію. Після логіну — видаляємо стару (якщо була) і створюємо нову, щоб уникнути конфліктів.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      // Новий імпорт </br>
+      import { createSession } from '../services/auth.js'; </br>
+      import { Session } from "../models/session.js"; </br>
+  </summary>
+     </br>
+    export const registerUser = async (req, res, next) => { </br>
+    const { email, password } = req.body; </br>
+     </br>
+    const existingUser = await User.findOne({ email }); </br>
+    if (existingUser) { </br>
+    return next(createHttpError(400, 'Email in use')); </br>
+    } </br>
+     </br>
+    const hashedPassword = await bcrypt.hash(password, 10); </br>
+     </br>
+    const newUser = await User.create({ </br>
+    email, </br>
+    password: hashedPassword, </br>
+    }); </br>
+     </br>
+    // Створюємо нову сесію </br>
+    const newSession = await createSession(newUser.\_id); </br>
+     </br>
+    res.status(201).json(newUser); </br>
+    }; </br>
+     </br>
+    export const loginUser = async (req, res, next) => { </br>
+    const { email, password } = req.body; </br>
+     </br>
+    const user = await User.findOne({ email }); </br>
+    if (!user) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    const isValidPassword = await bcrypt.compare(password, user.password); </br>
+    if (!isValidPassword) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    // Видаляємо стару сесію користувача </br>
+    await Session.deleteOne({ userId: user.\_id }); </br>
+     </br>
+    // Створюємо нову сесію </br>
+    const newSession = await createSession(user.\_id); </br>
+     </br>
+    res.status(200).json(user); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що відбувається:
+
+- Реєстрація: створюємо користувача, генеруємо пару токенів і зберігаємо сесію.
+- Логін: перевіряємо облікові дані, прибираємо попередню сесію користувача (якщо була), створюємо нову пару токенів і сесію.
+
+</details>
+</li>
+
+<li>
+<details>
+<summary>Cookies</summary>
+
+# Cookies
+
+Cookies (кукі) — це невеликі фрагменти даних, які сайт зберігає у браузері користувача. Вони допомагають «пам’ятати» стан між запитами: хто залогінений, які налаштування обрано, що лежить у кошику тощо. Для аутентифікації це ключовий механізм: ми зберігатимемо у куках токени доступу та ідентифікатор сесії.
+
+Основні властивості cookies:
+
+- Ідентифікація користувача — дозволяють відрізняти одного користувача від іншого.
+- Збереження стану сесії — не доводиться логінитися на кожному запиті.
+- Термін дії — можуть бути «сеансовими» (до закриття вкладки/браузера) або «персистентними» (живуть заданий час).
+- Безпека — важливо правильно налаштовувати прапори, щоб ускладнити крадіжку куки.
+- Доменність — браузер відправляє куки на той домен, який їх видав. Для запитів між різними доменами може знадобитися withCredentials: true (Axios) або credentials: 'include' (fetch).
+
+Щоб заборонити доступ до наших аутентифікаційних кук із клієнтського JavaScript (і таким чином знизити ризик XSS-крадіжки), ми ставимо прапор <strong>httpOnly: true</strong>.
+
+## Налаштовуємо парсер кук
+
+Встановлюємо пакет і підключаємо його як middleware:
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm i cookie-parser</em>
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/server.js </br>
+       </br>
+      import cookieParser from "cookie-parser"; </br>
+       </br>
+      // Решта коду файла </br>
+   </summary>
+     </br>
+    app.use(express.json()); </br>
+    app.use(cors()); </br>
+    app.use(cookieParser()); </br>
+</details>
+</em>
+
+## Які куки ми ставимо
+
+Після створення сесії відповідаємо трьома куками:
+
+- accessToken — короткоживучий токен доступу (у нас ~15 хв);
+- refreshToken — токен для оновлення пари токенів (у нас ~1 день);
+- sessionId — ідентифікатор поточної сесії (у нас ~1 день).
+
+Щоб не дублювати логіку, винесемо встановлення кукі у сервіс:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/services/auth.js </br>
+       </br>
+      // Решта коду файла </br>
+       </br>
+      export const setSessionCookies = (res, session) => { </br>
+      res.cookie('accessToken', session.accessToken, { </br>
+   </summary>
+    httpOnly: true, </br>
+    secure: true, </br>
+    sameSite: 'none', </br>
+    maxAge: FIFTEEN_MINUTES, </br>
+    }); </br>
+     </br>
+    res.cookie('refreshToken', session.refreshToken, { </br>
+    httpOnly: true, </br>
+    secure: true, </br>
+    sameSite: 'none', </br>
+    maxAge: ONE_DAY, </br>
+    }); </br>
+     </br>
+    res.cookie('sessionId', session.\_id, { </br>
+    httpOnly: true, </br>
+    secure: true, </br>
+    sameSite: 'none', </br>
+    maxAge: ONE_DAY, </br>
+    }); </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Пояснення ключових прапорів:
+
+- httpOnly: true — браузер не дає доступу до куки з JS (через document.cookie). Зменшує ризик витоку токенів через XSS.
+- secure: true — браузер надсилає таку куку лише через HTTPS. У продакшні це must-have; у дев-режимі без HTTPS такі куки не приліпнуть.
+- sameSite: 'none' — дозволяє надсилати куку у крос-доменних запитах (коли фронтенд і бекенд на різних доменах/порталах). Важливо: SameSite=None вимагає secure: true.
+  Для довідки: lax частково дозволяє крос-сайт (наприклад, при навігації за посиланням), strict — найжорсткіший варіант (тільки свій сайт).
+- maxAge — час життя у мілісекундах. Після спливу браузер перестає надсилати куку.
+
+## Додаємо встановлення cookie у контролери
+
+Контролери створюють/перевіряють користувача і сесію, після чого встановлюють куки:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      // 1. Імпортуємо функцію setSessionCookies </br>
+      import { createSession, setSessionCookies } from '../services/auth.js'; </br>
+       </br>
+      export const registerUser = async (req, res, next) => { </br>
+   </summary>
+    const { email, password } = req.body; </br>
+     </br>
+    const existingUser = await User.findOne({ email }); </br>
+    if (existingUser) { </br>
+    return next(createHttpError(400, 'Email in use')); </br>
+    } </br>
+     </br>
+    const hashedPassword = await bcrypt.hash(password, 10); </br>
+     </br>
+    const newUser = await User.create({ </br>
+    email, </br>
+    password: hashedPassword, </br>
+    }); </br>
+     </br>
+    const newSession = await createSession(newUser.\_id); </br>
+     </br>
+    // 2. Викликаємо, передаємо об'єкт відповіді та сесію </br>
+    setSessionCookies(res, newSession); </br>
+     </br>
+    res.status(201).json(newUser); </br>
+    }; </br>
+     </br>
+    export const loginUser = async (req, res, next) => { </br>
+    const { email, password } = req.body; </br>
+     </br>
+    const user = await User.findOne({ email }); </br>
+    if (!user) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    const isValidPassword = await bcrypt.compare(password, user.password); </br>
+    if (!isValidPassword) { </br>
+    return next(createHttpError(401, 'Invalid credentials')); </br>
+    } </br>
+     </br>
+    await Session.deleteOne({ userId: user.\_id }); </br>
+     </br>
+    const newSession = await createSession(user.\_id); </br>
+     </br>
+    // 3. Викликаємо, передаємо об'єкт відповіді та сесію </br>
+    setSessionCookies(res, newSession); </br>
+     </br>
+    res.status(200).json(user); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Підсумок
+
+Після успішної реєстрації або логіну ми створюємо сесію та встановлюємо три куки:
+
+- accessToken (живе 15 хвилин); </br>
+- refreshToken (живе 1 день); </br>
+- sessionId (живе 1 день). </br>
+  Куки налаштовані безпечно: </br>
+- httpOnly — недоступні з клієнтського JS; </br>
+- secure — передаються лише через HTTPS; </br>
+- sameSite: 'none' — дозволяє роботу в крос-доменних сценаріях; </br>
+- maxAge — задає термін дії для кожного cookie. </br>
+  Контролери при цьому: </br>
+- перевіряють валідність даних; </br>
+- створюють або знаходять користувача; </br>
+- генерують нову сесію; </br>
+- додають куки до відповіді; </br>
+- відправляють дані користувача клієнту. </br>
+
+Таким чином ми отримали повноцінний цикл: користувач вводить дані → бекенд перевіряє їх → створюється сесія → браузер отримує куки → подальші запити вже автентифіковані.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Логаут користувачів</summary>
+
+# Логаут користувачів
+
+Наступним кроком у розбудові нашої системи авторизації є вихід користувача з системи (logout).
+
+При виході нам потрібно виконати дві ключові дії:
+
+- Очистити cookies — зробити це може лише сервер, адже наші куки мають прапор httpOnly.
+- Видалити сесію з бази даних — щоб токени більше не були дійсними.
+
+## Контролер
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      // Решта коду файла </br>
+       </br>
+      export const logoutUser = async (req, res) => { </br>
+      const { sessionId } = req.cookies; </br>
+   </summary>
+     </br>
+    if (sessionId) { </br>
+    await Session.deleteOne({ \_id: sessionId }); </br>
+    } </br>
+     </br>
+    res.clearCookie('sessionId'); </br>
+    res.clearCookie('accessToken'); </br>
+    res.clearCookie('refreshToken'); </br>
+     </br>
+    res.status(204).send(); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Пояснення кроків:
+
+- Перевірка sessionId:Ми отримуємо sessionId з cookies.
+- Якщо він є, видаляємо відповідну сесію з бази даних (Session.deleteOne).
+- Очищення cookies:Використовуємо метод res.clearCookie для видалення всіх куків: sessionId, accessToken і refreshToken.
+- Це означає, що клієнт більше не зможе надсилати авторизовані запити.
+- Відповідь клієнту:Повертаємо статус 204 No Content.
+- Це стандартний код для успішного виконання запиту без тіла відповіді.
+
+## Роут
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routes/authRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+      import { </br>
+   </summary>
+    loginUser, </br>
+    logoutUser, </br>
+    registerUser, </br>
+    } from '../controllers/authController.js'; </br>
+    import { </br>
+    loginUserSchema, </br>
+    registerUserSchema, </br>
+    } from '../validations/authValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.post('/auth/register', celebrate(registerUserSchema), registerUser); </br>
+    router.post('/auth/login', celebrate(loginUserSchema), loginUser); </br>
+    // Новий роут </br>
+    router.post('/auth/logout', logoutUser); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+ </br>
+Тепер користувач може вийти з системи: сервер видалить його сесію та куки, а всі подальші запити більше не будуть вважатися авторизованими.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Аутентифікація</summary>
+
+# Оновлення сесії
+
+Ми вже майже завершили створення системи авторизації та аутентифікації. Залишився важливий крок — реалізувати ротацію токенів за допомогою refresh-токена. Це дозволить користувачу залишатися авторизованим навіть після завершення терміну дії короткоживучого access-токена.
+
+Контролер refreshUserSession
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      // Решта коду файла </br>
+       </br>
+      export const refreshUserSession = async (req, res, next) => { </br>
+      // 1. Знаходимо поточну сесію за id сесії та рефреш токеном </br>
+   </summary>
+    const session = await Session.findOne({ </br>
+    \_id: req.cookies.sessionId, </br>
+    refreshToken: req.cookies.refreshToken, </br>
+    }); </br>
+     </br>
+    // 2. Якщо такої сесії нема, повертаємо помилку </br>
+    if (!session) { </br>
+    return next(createHttpError(401, 'Session not found')); </br>
+    } </br>
+     </br>
+    // 3. Якщо сесія існує, перевіряємо валідність рефреш токена </br>
+    const isSessionTokenExpired = </br>
+    new Date() > new Date(session.refreshTokenValidUntil); </br>
+     </br>
+    // Якщо термін дії рефреш токена вийшов, повертаємо помилку </br>
+    if (isSessionTokenExpired) { </br>
+    return next(createHttpError(401, 'Session token expired')); </br>
+    } </br>
+     </br>
+    // 4. Якщо всі перевірки пройшли добре, видаляємо поточну сесію </br>
+    await Session.deleteOne({ </br>
+    \_id: req.cookies.sessionId, </br>
+    refreshToken: req.cookies.refreshToken, </br>
+    }); </br>
+     </br>
+    // 5. Створюємо нову сесію та додаємо кукі </br>
+    const newSession = await createSession(session.userId); </br>
+    setSessionCookies(res, newSession); </br>
+     </br>
+    res.status(200).json({ </br>
+    message: 'Session refreshed', </br>
+    }); </br>
+    }; </br>
+  </details>
+</em>
+ </br>
+Що тут відбувається:
+
+<strong>Пошук сесії</strong>
+Перевіряємо наявність у базі сесії з переданими у cookies sessionId та refreshToken.
+
+Якщо такої сесії немає — повертаємо 401 Unauthorized.
+
+<strong>Перевірка строку дії refresh-токена</strong>
+Якщо термін життя refreshToken минув (refreshTokenValidUntil), повертаємо помилку 401 Unauthorized.
+
+<strong>Видалення старої сесії</strong>
+Поточну сесію видаляємо з бази, щоб уникнути накопичення прострочених токенів.
+
+<strong>Створення нової сесії</strong>
+Викликаємо функцію createSession(session.userId), яка генерує нові accessToken і refreshToken.
+
+<strong>Встановлення куків</strong>
+Використовуємо setSessionCookies, щоб записати у відповідь нові cookies:
+
+- accessToken (15 хвилин),
+- refreshToken (1 день),
+- sessionId (1 день).
+
+<strong>Відповідь клієнту</strong>
+Відправляємо повідомлення "Session refreshed" зі статусом 200.
+
+## Роут
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routes/authRoutes.js </br>
+       </br>
+      import { Router } from 'express'; </br>
+      import { celebrate } from 'celebrate'; </br>
+      import { </br>
+   </summary>
+    loginUser, </br>
+    logoutUser, </br>
+    refreshUserSession, </br>
+    registerUser, </br>
+    } from '../controllers/authController.js'; </br>
+    import { </br>
+    loginUserSchema, </br>
+    registerUserSchema, </br>
+    } from '../validations/authValidation.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.post('/auth/register', celebrate(registerUserSchema), registerUser); </br>
+    router.post('/auth/login', celebrate(loginUserSchema), loginUser); </br>
+    router.post('/auth/logout', logoutUser); </br>
+    router.post('/auth/refresh', refreshUserSession); </br>
+     </br>
+    export default router; </br>
+  </details>
+</em>
+ </br>
+Таким чином, ми отримали повний цикл роботи сесій:
+
+- логін або реєстрація → створюється сесія;
+- у cookies зберігаються accessToken, refreshToken, sessionId;
+- після закінчення терміну дії accessToken користувач може звернутися на /auth/refresh;
+- сервер перевіряє refresh-токен, видаляє стару сесію та створює нову.
+
+Це дозволяє залишати користувача в системі без необхідності повторного логіну кожні 15 хвилин.
+
+</details>
+</li>
+<li>
+<details>
+
+<summary>Middleware аутентифікації</summary>
+
+# Middleware аутентифікації
+
+Ми вже створили механізм сесій, токенів і cookies. Наступним кроком є контроль доступу до наших даних. У реальних застосунках є приватні дані — ті, що не повинні бути доступні будь-кому. Наприклад:
+
+- список студентів бачать лише авторизовані користувачі;
+- профіль користувача доступний тільки йому самому;
+- адмін-панель відкривається тільки для користувачів із роллю адміністратора.
+
+Щоб обмежити доступ до приватних колекцій, ми створимо middleware authenticate, який перевірятиме токени у cookies і визначатиме, чи користувач може виконати запит.
+
+## Middleware authenticate
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/middleware/authenticate.js </br>
+       </br>
+      import createHttpError from 'http-errors'; </br>
+      import { Session } from '../models/session.js'; </br>
+      import { User } from '../models/user.js'; </br>
+   </summary>
+     </br>
+    export const authenticate = async (req, res, next) => { </br>
+    // 1. Перевіряємо наявність accessToken </br>
+    if (!req.cookies.accessToken) { </br>
+    next(createHttpError(401, 'Missing access token')); </br>
+    return; </br>
+    } </br>
+     </br>
+    // 2. Якщо access токен існує, шукаємо сесію </br>
+    const session = await Session.findOne({ </br>
+    accessToken: req.cookies.accessToken, </br>
+    }); </br>
+     </br>
+    // 3. Якщо такої сесії нема, повертаємо помилку </br>
+    if (!session) { </br>
+    next(createHttpError(401, 'Session not found')); </br>
+    return; </br>
+    } </br>
+     </br>
+    // 4. Перевіряємо термін дії access токена </br>
+    const isAccessTokenExpired = </br>
+    new Date() > new Date(session.accessTokenValidUntil); </br>
+     </br>
+    if (isAccessTokenExpired) { </br>
+    return next(createHttpError(401, 'Access token expired')); </br>
+    } </br>
+     </br>
+    // 5. Якщо з токеном все добре і сесія існує, шукаємо користувача </br>
+    const user = await User.findById(session.userId); </br>
+     </br>
+    // 6. Якщо користувача не знайдено </br>
+    if (!user) { </br>
+    next(createHttpError(401)); </br>
+    return; </br>
+    } </br>
+     </br>
+    // 7. Якщо користувач існує, додаємо його до запиту </br>
+    req.user = user; </br>
+     </br>
+    // 8. Передаємо управління далі </br>
+    next(); </br>
+    }; </br>
+  </details>
+</em>
+ </br>
+Що робить цей middleware
+
+- Перевіряє cookies: чи є там accessToken. Якщо немає — відмовляємо у доступі.
+- Шукає сесію: чи існує в базі сесія з таким токеном.
+- Перевіряє строк дії токена: якщо він прострочений — користувач має оновити сесію.
+- Шукає користувача: якщо сесія дійсна, але користувач у базі видалений — доступ також забороняється.
+- Додає користувача у req: після цього контролери зможуть отримати інформацію про нього (req.user).
+- Таким чином кожен запит до приватних ресурсів проходить перевірку перед тим, як дійти до контролера.
+
+## Використання у маршрутах
+
+Тепер ми можемо скористатись нашим middleware authenticate в роутері для запитів до колекції студентів:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routes/studentsRoutes.js </br>
+       </br>
+      import { Router } from "express"; </br>
+      import { celebrate } from "celebrate"; </br>
+      import { </br>
+      getStudents, </br>
+   </summary>
+    getStudentById, </br>
+    createStudent, </br>
+    deleteStudent, </br>
+    updateStudent, </br>
+    } from "../controllers/studentsController.js"; </br>
+    import { </br>
+    createStudentSchema, </br>
+    getStudentsSchema, </br>
+    studentIdParamSchema, </br>
+    updateStudentSchema, </br>
+    } from "../validations/studentsValidation.js"; </br>
+     </br>
+    // 1. Імпортуємо middleware </br>
+    import { authenticate } from "../middleware/authenticate.js"; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    // 2. Додаємо middleware до всіх шляхів, що починаються з /students </br>
+    router.use("/students", authenticate); </br>
+     </br>
+    router.get("/students", celebrate(getStudentsSchema), getStudents); </br>
+    router.get("/students/:studentId", celebrate(studentIdParamSchema), getStudentById); </br>
+    router.post("/students", celebrate(createStudentSchema), createStudent); </br>
+    router.delete("/students/:studentId", celebrate(studentIdParamSchema), deleteStudent); </br>
+    router.patch("/students/:studentId", celebrate(updateStudentSchema), updateStudent); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+ </br>
+Коли ми приміняємо middleware таким чином router.use(path, middleware), вона будет примінятися до всіх роутів цього роутера. Тобто, вона відпрацює на всіх роутах, що починаються зі /students.
+
+Висновок
+
+- Middleware authenticate виконує роль «охоронця» приватних даних.
+- Він перевіряє токени, сесію та користувача.
+- Якщо перевірка успішна — доступ до колекції студентів відкривається.
+- Якщо ні — користувач отримує відповідь з 401 Unauthorized.
+
+Таким чином ми забезпечуємо безпечний доступ до наших даних: працювати з колекцією студентів можуть тільки ті користувачі, що пройшли аутентифікацію.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Зв’язок між моделями</summary>
+
+# Зв’язок між моделями
+
+Основна ідея авторизації полягає у тому, щоб обмежувати доступ до ресурсів на основі певних умов. У нашому випадку ми можемо уявити сценарій: користувачі — це викладачі, а студенти — це школяи, з якими вони працюють.
+
+Щоб кожен викладач бачив тільки своїх студентів, нам потрібно встановити зв’язок між моделями users та students.
+
+## Додаємо зв’язок у модель студента
+
+Ми розширимо схему студента, додавши поле userId. Це дозволить зрозуміти, кому саме належить конкретний студент:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/models/student.js </br>
+       </br>
+      import { Schema, model } from "mongoose"; </br>
+       </br>
+      const studentSchema = new Schema( </br>
+      { </br>
+   </summary>
+    name: { type: String, required: true }, </br>
+    age: { type: Number, required: true }, </br>
+    gender: { type: String, required: true, enum: ["male", "female", "other"] }, </br>
+    avgMark: { type: Number, required: true }, </br>
+    onDuty: { type: Boolean, default: false }, </br>
+    // Нова властивість </br>
+    userId: { </br>
+    type: Schema.Types.ObjectId, </br>
+    ref: "User", </br>
+    required: true, </br>
+    }, </br>
+    }, </br>
+    { </br>
+    timestamps: true, </br>
+    versionKey: false, </br>
+    } </br>
+    ); </br>
+     </br>
+    export const Student = model("Student", studentSchema); </br>
+ </details>
+</em>
+ </br>
+<strong>Що таке ref?</strong>
+
+ref: "User" означає, що поле userId посилається на інший документ у колекції users.
+Таким чином ми встановлюємо зв’язок між колекціями: кожен студент належить певному користувачу.
+Це дозволяє виконувати запити з використанням методу populate (наприклад, отримати студента разом з інформацією про користувача, якому він належить).
+
+## Оновлюємо контролер створення студента
+
+Коли ми створюємо нового студента, потрібно вказати, якому користувачу він належить. Для цього використаємо властивість req.user, яку ми отримуємо завдяки middleware authenticate.
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      import createHttpError from "http-errors"; </br>
+      import { Student } from "../models/student.js"; </br>
+    </summary>
+     </br>
+    // Решта коду файла </br>
+     </br>
+    export const createStudent = async (req, res) => { </br>
+    const student = await Student.create({ </br>
+    ...req.body, </br>
+    // Додаємо властивість userId </br>
+    userId: req.user.\_id, </br>
+    }); </br>
+     </br>
+    res.status(201).json(student); </br>
+    }; </br>
+  </details>
+</em>
+ </br>
+Висновок
+
+Тепер у нашій базі кожен студент «прив’язаний» до конкретного користувача. Це відкриває можливість:
+
+- обмежувати доступ до студентів лише їхнім власникам;
+- робити більш складні запити з використанням зв’язків;
+- розширювати функціонал системи (наприклад, додати ролі викладачів, які бачать тільки своїх учнів).
+
+</details>
+</li>
+<li>
+<details>
+<summary>Приватні дані</summary>
+
+# Приватні дані
+
+Ми вже підключили middleware аутентифікації до всіх маршрутів студентів і додали в модель студента поле userId, що зв’язує студента з власником (користувачем). Настав час оновити контролери так, щоб:
+
+- повертати тільки студентів поточного користувача;
+- дозволяти читання/оновлення/видалення студента лише його власнику.
+
+## Отримання всіх студентів: GET /students
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const getStudents = async (req, res) => { </br>
+      // Решта коду функції </br>
+   </summary>
+     </br>
+    // Додаємо критерій пошуку тільки студентів поточного користувача </br>
+    const studentsQuery = Student.find({ userId: req.user.\_id }); </br>
+     </br>
+    // Решта коду функції </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Що змінилось і чому так:
+
+- Використовуємо <strong>Student.find({ userId: req.user.\_id })</strong>, щоб одразу обмежити вибірку студентами, які належать автентифікованому користувачу.
+- Далі до цього запиту, як і раніше, можна послідовно додавати фільтри (where), пагінацію (skip, limit) і сортування (sort) — усе застосовується вже в межах «своїх» даних користувача.
+
+## Отримання одного студента: GET /students/:studentId
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const getStudentById = async (req, res, next) => { </br>
+      const { studentId } = req.params; </br>
+   </summary>
+     </br>
+    const student = await Student.findOne({ </br>
+    \_id: studentId, </br>
+    userId: req.user.\_id, </br>
+    }); </br>
+     </br>
+    if (!student) { </br>
+    return next(createHttpError(404, "Student not found")); </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Чому саме <strong>findOne</strong>:
+
+- Нам потрібно знайти конкретний документ за двома умовами: \_id студента і userId власника.
+- Якщо хоча б одна з умов не виконується (нема такого студента або він належить іншому користувачу) — отримаємо null і повернемо 404. Це захищає приватні дані.
+
+## Видалення студента: DELETE /students/:studentId
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const deleteStudent = async (req, res, next) => { </br>
+      const { studentId } = req.params; </br>
+      const student = await Student.findOneAndDelete({ </br>
+    </summary>
+    \_id: studentId, </br>
+    // Критерій пошуку по userId </br>
+    userId: req.user.\_id, </br>
+    }); </br>
+     </br>
+    if (!student) { </br>
+    next(createHttpError(404, "Student not found")); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).send(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що тут важливо:
+
+- Використовуємо <strong>findOneAndDelete</strong> з подвійною умовою (\_id + userId).
+- Якщо документ не знайдений, повертаємо 404.
+- Таким чином користувач не може видалити чужого студента навіть якщо знає його id.
+
+## Оновлення студента: PATCH /students/:studentId
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/studentsController.js </br>
+       </br>
+      export const updateStudent = async (req, res, next) => { </br>
+      const { studentId } = req.params; </br>
+   </summary>
+     </br>
+    const student = await Student.findOneAndUpdate( </br>
+    // Критерій пошуку по userId </br>
+    { \_id: studentId, userId: req.user.\_id }, </br>
+    req.body, </br>
+    { new: true } </br>
+    ); </br>
+     </br>
+    if (!student) { </br>
+    next(createHttpError(404, "Student not found")); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json(student); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Логіка така сама:
+
+- Оновлюємо лише той документ, який одночасно відповідає studentId і належить поточному користувачу (userId).
+- Якщо такого документа немає — повертаємо 404.
+
+Підсумок
+
+- Додавши userId до схеми студента та використовуючи його в критеріях пошуку (find, findOne, findOneAndUpdate, findOneAndDelete), ми забезпечили приватність колекції.
+- Усі операції тепер виконуються в межах даних поточного користувача.
+- Навіть якщо зловмисник дізнається studentId, він не зможе отримати доступ до документа, що йому не належить.
+
+</details>
+</li>
+</ul>
+</details>

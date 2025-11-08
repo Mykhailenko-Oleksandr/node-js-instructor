@@ -14,9 +14,13 @@ import {
   getStudentsSchema,
   studentIdParamSchema,
   updateStudentSchema,
-} from '../../validations/studentsValidation.js';
+} from '../validations/studentsValidation.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
+
+// 2. Додаємо middleware до всіх шляхів, що починаються з /students
+router.use('/students', authenticate);
 
 router.get('/students', celebrate(getStudentsSchema), getStudents);
 router.get(
