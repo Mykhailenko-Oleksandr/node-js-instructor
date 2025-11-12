@@ -5186,3 +5186,924 @@ ref: "User" означає, що поле userId посилається на і�
 </li>
 </ul>
 </details>
+<details>
+<summary>Module 5</summary>
+<ul>
+<li>
+<details>
+<summary>Скидання паролю</summary>
+
+# Скидання паролю
+
+Реалізуємо ендпоінт POST /auth/request-reset-email, який надсилатиме лист із посиланням для скидання пароля.
+
+## Валідація тіла запиту
+
+Ми очікуємо лише email, тож схема максимально проста:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/validations/authValidation.js </br>
+       </br>
+      // Решта коду файла </br>
+       </br>
+      export const requestResetEmailSchema = { </br>
+    </summary>
+    [Segments.BODY]: Joi.object({ </br>
+    email: Joi.string().email().required(), </br>
+    }), </br>
+    }; </br>
+</details>
+</em>
+ </br>
+Перевіряємо, що в тілі є коректний email. Це мінімізує зайві звернення до бази й дає користувачу чітке повідомлення про помилку ще до виконання бізнес-логіки.
+
+## Контролер для надсилання листа
+
+Створимо контролер, який оброблятиме запит на зміну пароля:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      // Решта коду файла </br>
+       </br>
+      export const requestResetEmail = async (req, res) => { </br>
+   </summary>
+    const { email } = req.body; </br>
+     </br>
+    const user = await User.findOne({ email }); </br>
+     </br>
+        res.status(200).json({ </br>
+        	message: 'Password reset email sent successfully' </br>
+        }); </br>
+     </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що тут відбувається:
+
+- Знаходимо користувача за email.
+- Формуємо «успішну» відповідь (далі додамо фактичне надсилання листа).
+- Поки що не перевіряємо існування користувача.
+
+## Маршрут
+
+Підключаємо валідацію і контролер у роут:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routers/auth.js </br>
+       </br>
+      import { </br>
+      loginUserSchema, </br>
+      registerUserSchema, </br>
+   </summary>
+    requestResetEmailSchema </br>
+    } from '../validations/authValidation.js'; </br>
+    import { </br>
+    loginUser, </br>
+    logoutUser, </br>
+    refreshUserSession, </br>
+    registerUser, </br>
+    requestResetEmail </br>
+    } from '../controllers/authController.js'; </br>
+     </br>
+    // Решта коду файла </br>
+     </br>
+    router.post( </br>
+    '/auth/request-reset-email', </br>
+    celebrate(requestResetEmailSchema), </br>
+    requestResetEmail, </br>
+    ); </br>
+ </details>
+</em>
+ </br>
+<strong>celebrate(requestResetEmailSchema)</strong> запустить перевірку тіла запиту до виконання контролера. Якщо email некоректний — клієнт одразу отримає 400 Bad Request.
+
+## Підготовка SMTP і утиліти надсилання
+
+Перш ніж реалізовувати сервісну функцію надсилання листа про відновлення пароля, створимо власне функціонал відправлення листів. Для цього скористаємося максимально «нативним» рішенням (без сторонніх сервісів-обгорток) — бібліотекою <strong>nodemailer</strong>.
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm install nodemailer</em>
+
+Створимо додаткові змінні оточення (значення у вас будуть свої):
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      .env</br>
+      </br>
+      \\ Решта коду файла</br>
+      </br>
+      SMTP_HOST=smtp-relay.brevo.com</br>
+    </summary>
+    SMTP_PORT=587</br>
+    SMTP_USER=75c8r8001@smtp-brevo.com</br>
+    SMTP_PASSWORD=xsmtpswe-2c4be41c740592e4f94c29m6793dea86778280700157e4e9aeee41e94591368e-9cfna8EPjdAbGWU6</br>
+    SMTP_FROM=boris.meshkov.98@gmail.com</br>
+ </details>
+</em>
+</br>
+У прикладі використано Brevo. Це надійний SMTP-провайдер із зручним дашбордом і тестовими тарифами. Облікові дані (host, порт, логін, пароль, відправник) беруться з їхнього інтерфейсу.
+
+Подивімося, де саме взяти значення змінних оточення:
+
+Функціонал відправлення листів виносимо в окрему утиліту <strong>sendEmail</strong>:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/utils/sendEmail.js </br>
+       </br>
+      import nodemailer from 'nodemailer'; </br>
+       </br>
+      const transporter = nodemailer.createTransport({ </br>
+      host: process.env.SMTP_HOST, </br>
+   </summary>
+    port: process.env.SMTP_PORT, </br>
+    auth: { </br>
+    user: process.env.SMTP_USER, </br>
+    pass: process.env.SMTP_PASSWORD, </br>
+    }, </br>
+    }); </br>
+     </br>
+    export const sendEmail = async (options) => { </br>
+    return await transporter.sendMail(options); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+- <strong>transporter</strong> створює з’єднання зі SMTP-сервером.
+- <strong>nodemailer</strong> автоматично підбере безпечні налаштування відповідно до порту та відповіді сервера.
+
+## Генеруємо токен (JWT) для лінка
+
+Встановлюємо бібліотеку <strong>jsonwebtoken</strong> для роботи з JWT.
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm i jsonwebtoken</em>
+
+Для створення токена потрібен випадковий секретний рядок. Додаємо його як змінну оточення JWT_SECRET, що використовуватиметься для підпису токена. Значення може бути довільним, напр., wKYqbcFlT0AOdZPkyTH6URf0gG або будь-яке інше.
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <em>
+    // .env</br>
+    </br>
+    // Решта коду файла</br>
+    </br>
+    JWT_SECRET=wKYqbcFlT0AOdZPkyTH6URf0gG</br>
+  </em>
+</div>
+</br>
+Оновлюємо контролер — додаємо генерацію токена та надсилання листа:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      import jwt from 'jsonwebtoken'; </br>
+      import { sendEmail } from '../utils/sendEmail.js'; </br>
+       </br>
+      // Решта коду файла </br>
+    </summary>
+     </br>
+    export const requestResetEmail = async (req, res, next) => { </br>
+    const { email } = req.body; </br>
+     </br>
+    const user = await User.findOne({ email }); </br>
+    // Якщо користувача нема — навмисно повертаємо ту саму "успішну" </br>
+    // відповідь без відправлення листа (anti user enumeration). </br>
+    if (!user) { </br>
+    return res.status(200).json({ </br>
+    message: 'If this email exists, a reset link has been sent', </br>
+    }); </br>
+    } </br>
+     </br>
+        // Користувач є — генеруємо короткоживучий JWT і відправляємо лист </br>
+     </br>
+    const resetToken = jwt.sign( </br>
+    { sub: user.\_id, email }, </br>
+    process.env.JWT_SECRET, </br>
+    { expiresIn: '15m' }, </br>
+    ); </br>
+     </br>
+    try { </br>
+    await sendEmail({ </br>
+    from: process.env.SMTP_FROM, </br>
+    to: email, </br>
+    subject: 'Reset your password', </br>
+    html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`, </br>
+    }); </br>
+    } catch { </br>
+    next(createHttpError(500, 'Failed to send the email, please try again later.')); </br>
+    return; </br>
+    } </br>
+     </br>
+        // Та сама "нейтральна" відповідь </br>
+     </br>
+    res.status(200).json({ </br>
+    message: 'If this email exists, a reset link has been sent', </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+
+- Термін дії токена — 15 хвилин. Цього достатньо, щоб перейти за лінком, і це знижує ризики компрометації.
+- Що класти в payload — мінімум потрібної інформації (sub, email). Пам’ятай: payload не шифрується, а лише підписується.
+- Обгортання sendEmail у try/catch дає коректну відповідь 500 у випадку збою поштового сервісу.
+
+Однакові відповіді із статусом 200 це техніка щоб унеможливити «вичитування» наявності облікового запису. Тобто ми повертаємо однакову відповідь і для існуючої, і для неіснуючої пошти.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Шаблонізатор Handlebars</summary>
+
+# Шаблонізатор Handlebars
+
+У попередньому прикладі для поля html ми використали шаблонний рядок:
+
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+  <em>
+    await sendEmail({ </br>
+    from: process.env.SMTP_FROM, </br>
+    to: email, </br>
+    subject: 'Reset your password', </br>
+    html:
+
+    `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+    });
+
+  </em>
+</div>
+ </br>
+Але так незручно: реальний лист зазвичай більший, може містити умовну логіку, цикли, повторювані блоки тощо. Для таких випадків зручно використовувати шаблонізатори.
+
+<strong>Шаблонізатори</strong> — це інструменти, що генерують HTML на основі даних. Вони дозволяють підставляти значення змінних у розмітку, описувати умови та цикли, а також розділяють бізнес-логіку й подання. Ми скористаємося <strong>Handlebars</strong> — популярним шаблонізатором для JavaScript.
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm i handlebars</em>
+
+Основні риси шаблонізаторів і Handlebars:
+
+- Зручний синтаксис. Просте вставляння змінних, умов (if/else) і циклів (each) без «спагеті-рядків».
+- Розділення відповідальностей. HTML живе у шаблонах, а логіка — в коді; підтримувати й оновлювати простіше.
+- Повторне використання. Можна мати окремі шаблони/частини й підключати їх у різних місцях.
+- Умови та цикли. Динамічні блоки формуються безпосередньо в шаблоні.
+- Безпека. Handlebars за замовчуванням екранує вставки, зменшуючи ризик XSS (не використовуй {{{triple}}}, якщо не впевнений у вхідних даних).
+- Зрілість екосистеми. Добра документація, багато прикладів і гайдлайнів.
+
+## Створюємо шаблон листа
+
+Додай файл src/templates/reset-password-email.html:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>// src/templates/reset-password-email.html</summary>
+
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Reset password email</title>
+      </head>
+
+      <body>
+        <h1 style="color: blue">Hello, {{name}}!</h1>
+        <p>Click <a href="{{link}}">here</a> to reset your password!</p>
+      </body>
+    </html>
+
+</details>
+</em>
+ </br>
+У синтаксисі <strong>{{ ... }}</strong> ми вказуємо, які поля з об’єкта даних слід підставити в HTML.
+
+## Підключаємо Handlebars у контролері
+
+Знову доповнюємо код контролера надсилання пошти:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      import handlebars from 'handlebars'; </br>
+      import path from 'node:path'; </br>
+      import fs from 'node:fs/promises'; </br>
+   </summary>
+     </br>
+    export const requestResetEmail = async (req, res, next) => { </br>
+    const { email } = req.body; </br>
+     </br>
+    const user = await User.findOne({ email }); </br>
+    if (!user) { </br>
+    return res.status(200).json({ </br>
+    message: 'If this email exists, a reset link has been sent', </br>
+    }); </br>
+    } </br>
+     </br>
+    const resetToken = jwt.sign( </br>
+    { sub: user.\_id, email }, </br>
+    process.env.JWT_SECRET, </br>
+    { expiresIn: '15m' }, </br>
+    ); </br>
+     </br>
+        // 1. Формуємо шлях до шаблона </br>
+     </br>
+    const templatePath = path.resolve('src/templates/reset-password-email.html'); </br>
+    // 2. Читаємо шаблон </br>
+    const templateSource = await fs.readFile(templatePath, 'utf-8'); </br>
+    // 3. Готуємо шаблон до заповнення </br>
+    const template = handlebars.compile(templateSource); </br>
+    // 4. Формуємо із шаблона HTML документ з динамічними даними </br>
+    const html = template({ </br>
+    name: user.username, </br>
+    link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${resetToken}`, </br>
+    }); </br>
+     </br>
+    try { </br>
+    await sendEmail({ </br>
+    from: process.env.SMTP_FROM, </br>
+    to: email, </br>
+    subject: 'Reset your password', </br>
+    // 5. Передаємо HTML у функцію надписання пошти </br>
+    html, </br>
+    }); </br>
+    } catch { </br>
+    next( </br>
+    createHttpError(500, 'Failed to send the email, please try again later.'), </br>
+    ); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json({ </br>
+    message: 'If this email exists, a reset link has been sent', </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Пояснення до кроків:
+
+- <strong>(1)–(2)</strong> Отримуємо шлях до HTML-шаблона та читаємо його як текст.
+- <strong>(3)</strong> handlebars.compile() перетворює сирий шаблон на функцію, яку можна викликати з даними.
+- <strong>(4)</strong> Передаємо у шаблон об’єкт { name, link } — на виході маємо готовий HTML з підставленими значеннями.
+- <strong>(5)</strong> Надсилаємо згенерований HTML листом через нашу утиліту sendEmail.
+
+У змінній оточення <strong>FRONTEND_DOMAIN</strong> поки що збережи http://localhost:3000. Згодом тут буде URL сторінки фронтенда, на якій користувач встановлюватиме новий пароль після переходу за посиланням із листа.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Зміна паролю</summary>
+
+# Зміна паролю
+
+Тепер додамо частину функціоналу, що дозволяє встановити новий пароль за токеном із листа. Маршрут — POST /auth/reset-password.
+
+## Валідація тіла запиту
+
+Ми очікуємо два поля: сам токен і новий пароль. Схема мінімальна — перевіряємо наявність і базовий формат:
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/validations/authValidation.js</br>
+      </br>
+      // Решта коду файла</br>
+      </br>
+      export const resetPasswordSchema = {</br>
+   </summary>
+    [Segments.BODY]: Joi.object({</br>
+    password: Joi.string().min(8).required(),</br>
+    token: Joi.string().required(),</br>
+    }),</br>
+    };</br>
+</details>
+</em>
+</br>
+- token — підписаний JWT, який ми надіслали в листі (дійсний упродовж 15 хв).
+- password — новий пароль, який користувач хоче встановити.
+
+## Контролер
+
+Контролер виконує чотири ключові кроки: перевіряє токен, знаходить користувача, хешує новий пароль і оновлює запис.
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/authController.js </br>
+       </br>
+      import bcrypt from 'bcrypt'; </br>
+      import jwt from 'jsonwebtoken'; </br>
+       </br>
+      // Решта коду файла </br>
+   </summary>
+     </br>
+    export const resetPassword = async (req, res, next) => { </br>
+    const { token, password } = req.body; </br>
+     </br>
+        // 1. Перевіряємо/декодуємо токен </br>
+     </br>
+    let payload; </br>
+    try { </br>
+    payload = jwt.verify(token, process.env.JWT_SECRET); </br>
+    } catch { </br>
+    // Повертаємо помилку якщо проблема при декодуванні </br>
+    next(createHttpError(401, 'Invalid or expired token')); </br>
+    return; </br>
+    } </br>
+     </br>
+    // 2. Шукаємо користувача </br>
+    const user = await User.findOne({ \_id: payload.sub, email: payload.email }); </br>
+     if (!user) { </br>
+    next(createHttpError(404, 'User not found')); </br>
+    return; </br>
+    } </br>
+     </br>
+    // 3. Якщо користувач існує </br>
+    // створюємо новий пароль і оновлюємо користувача </br>
+    const hashedPassword = await bcrypt.hash(password, 10); </br>
+    await User.updateOne( </br>
+    { \_id: user.\_id }, </br>
+    { password: hashedPassword } </br>
+    ); </br>
+     </br>
+    // 4. Інвалідовуємо всі можливі попередні сесії користувача </br>
+    await Session.deleteMany({ userId: user.\_id }); </br>
+     </br>
+        // 5. Повертаємо успішну відповідь </br>
+     </br>
+    res.status(200).json({ </br>
+    message: 'Password reset successfully. Please log in again.', </br>
+    }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+Що тут відбувається:
+
+- Перевірка токена. jwt.verify() гарантує дійсність і непідробність токена, а також перевіряє строк дії (expiresIn).
+- Пошук користувача. Для надійності використовуємо і sub (id), і email із payload.
+- Оновлення пароля. Пароль ніколи не зберігаємо у відкритому вигляді — тільки у вигляді хешу (bcrypt.hash).
+- Видаляємо всі сесії які можуть існувати для цього користувача.
+- Відповідь клієнту. Повертаємо 200 та повідомлення про успіх.
+
+## Маршрут
+
+Додаємо валідацію та контролер до маршруту:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routeі/authRoutes.js </br>
+       </br>
+      import { resetPassword } from '../controllers/authController.js'; </br>
+      import { resetPasswordSchema } from '../validations/authValidation.js'; </br>
+   </summary>
+     </br>
+    // Решта коду файла </br>
+     </br>
+    router.post( </br>
+    '/auth/reset-password', </br>
+    celebrate(resetPasswordSchema), </br>
+    resetPassword </br>
+    ); </br>
+ </details>
+</em>
+ </br>
+Із цим ендпоінтом користувач переходить за посиланням із листа, надсилає токен і новий пароль — і після перевірок пароль надійно оновлюється.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Аватар користувача</summary>
+
+# Аватар користувача
+
+Ми реалізуємо можливість користувачеві змінювати аватар. Тому до моделі користувача додаємо необов’язкову властивість avatar зі значенням за замовчуванням.
+
+<em>
+<details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    <summary>
+      // src/models/user.js </br>
+       </br>
+      import { model, Schema } from "mongoose"; </br>
+       </br>
+      const userSchema = new Schema( </br>
+    </summary>
+    { </br>
+    username: { type: String, required: false }, </br>
+    email: { type: String, unique: true, required: true }, </br>
+    password: { type: String, required: true }, </br>
+    // Нова властивість </br>
+    avatar: { </br>
+    type: String, </br>
+    required: false, </br>
+    default: "<https://ac.goit.global/fullstack/react/default-avatar.jpg>", </br>
+    }, </br>
+    }, </br>
+    { timestamps: true, versionKey: false } </br>
+    ); </br>
+     </br>
+    // Решта коду файла </br>
+</details>
+</em>
+ </br>
+Маршрут, за яким ми дозволимо змінювати аватар, буде PATCH /users/me/avatar, тому створюємо новий контролер (поки що порожній):
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/userController.js </br>
+       </br>
+      export const updateUserAvatar = async (req, res, next) => { </br>
+      res.status(200).json({ url: "" }); </br>
+      }; </br>
+   </summary>
+     </br>
+    Та роутер для ресурсу /users: </br>
+     </br>
+    // src/routes/userRoutes.js </br>
+     </br>
+    import { Router } from 'express'; </br>
+    import { authenticate } from '../middleware/authenticate.js'; </br>
+    import { updateUserAvatar } from '../controllers/userController.js'; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.patch( </br>
+    '/users/me/avatar', </br>
+    authenticate, </br>
+    updateUserAvatar, </br>
+    ); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+ </br>
+Middleware authenticate гарантує, що змінювати аватар може лише автентифікований користувач від свого імені.
+
+І у файлі src/server.js імпортуємо нові раути та додаємо їх через app.use:
+
+<em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    // src/server.js </br>
+     </br>
+    import userRoutes from './routes/userRoutes.js'; </br>
+     </br>
+    app.use(studentsRoutes); </br>
+    app.use(authRoutes); </br>
+    // Додаємо раути користувача </br>
+    app.use(userRoutes); </br>
+</div>
+</em>
+ </br>
+Тепер ми готові реалізувати саме завантаження зображень.
+
+</details>
+</li>
+<li>
+<details>
+<summary>Налаштування Multer</summary>
+
+# Налаштування Multer
+
+Спочатку встановимо і налаштуємо middleware multer для завантаження зображень:
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm i multer</em>
+
+Для сховища використаємо метод <strong>memoryStorage</strong>, який зберігає файли безпосередньо в оперативній памʼяті. Це зручно — ми одразу маємо доступ до вмісту файлу у коді й нам не потрібно спершу зберігати його на диск, а потім читати назад. Недолік такого підходу — підвищене навантаження на RAM. Частково вирішити це можна, обмеживши максимальний розмір завантажуваного файлу.
+
+<em>
+  <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/middleware/multer.js </br>
+       </br>
+      import multer from 'multer'; </br>
+       </br>
+      export const upload = multer({ </br>
+      storage: multer.memoryStorage(), </br>
+   </summary>
+    limits: { </br>
+    fileSize: 2 _ 1024 _ 1024, </br>
+    }, </br>
+    fileFilter: (req, file, cb) => { </br>
+    if (!file.mimetype || !file.mimetype.startsWith('image/')) { </br>
+    return cb(new Error('Only images allowed')); </br>
+    } </br>
+    cb(null, true); </br>
+    }, </br>
+    }); </br>
+  </details>
+</em>
+ </br>
+Що тут відбувається?
+
+- <strong>storage: multer.memoryStorage()</strong> — зберігає файл у пам’яті сервера (не на диску).
+- <strong>limits.fileSize</strong> — обмежує розмір завантаження до 2 МБ.
+- <strong>fileFilter</strong> — визначає, які файли дозволено приймати. У цьому випадку — лише ті, чий mimetype починається з "image/".
+
+<strong>fileFilter</strong> — це функція, яку multer викликає для кожного завантаженого файлу. Вона отримує три аргументи:
+
+- <strong>req</strong> — HTTP-запит, як у звичайному Express;
+- <strong>file</strong> — інформація про файл (назва, MIME-тип, розмір тощо);
+- <strong>cb</strong> — callback, який повідомляє multer, що робити з файлом.
+
+Варіанти виклику cb:
+
+- <strong>cb(null, true)</strong> — файл дозволено (приймаємо);
+- <strong>cb(null, false)</strong> — файл відхилено без помилки;
+- <strong>cb(new Error('...'))</strong> — файл відхилено з помилкою, обробка переривається.
+
+Отже, у цьому коді:
+
+- якщо mimetype не починається з 'image/', викликається cb(new Error('Only images allowed'));
+- інакше — cb(null, true), тобто файл приймається.
+
+Цей middleware підключається не глобально, а безпосередньо до потрібного маршруту. Додаємо його у PATCH /users/me/avatar:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/routes/userRoutes.js </br>
+       </br>
+      import { Router } from "express"; </br>
+      import { authenticate } from "../middleware/authenticate.js"; </br>
+      import { updateUserAvatar } from "../controllers/userController.js"; </br>
+   </summary>
+    // Імпортуємо middleware </br>
+    import { upload } from "../middleware/multer.js"; </br>
+     </br>
+    const router = Router(); </br>
+     </br>
+    router.patch( </br>
+    "/users/me/avatar", </br>
+    authenticate, </br>
+    // Додаємо після авторизації, але до контролера </br>
+    upload.single("avatar"), </br>
+    updateUserAvatar </br>
+    ); </br>
+     </br>
+    export default router; </br>
+ </details>
+</em>
+ </br>
+Метод <strong>single(fieldname)</strong> обробляє рівно один файл. У запиті очікується поле з іменем, яке ви вказали ("avatar"), і Multer прикріплює цей файл до req.file.
+
+## Робота з файлом у контролері
+
+У контролері тепер треба перевіряти, чи є файл, інакше повернути помилку:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/userController.js </br>
+       </br>
+      import createHttpError from "http-errors"; </br>
+      import { User } from "../models/user.js"; </br>
+   </summary>
+     </br>
+    export const updateUserAvatar = async (req, res, next) => { </br>
+    if (!req.file) { </br>
+    next(createHttpError(400, "No file")); </br>
+    return; </br>
+    } </br>
+     </br>
+    res.status(200).json({ url: "" }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+У req.file зберігається такий об’єкт (для multer.memoryStorage()):
+
+<em>
+ <div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    { </br>
+    fieldname: 'avatar', // назва поля у формі </br>
+    originalname: 'download.jpeg', // оригінальне ім’я файлу на клієнті </br>
+    encoding: '7bit', // тип кодування передавання </br>
+    mimetype: 'image/jpeg', // MIME-тип файлу </br>
+    size: 12345, // розмір у байтах </br>
+    buffer: <Buffer ff d8 ff ...> // вміст файлу (Buffer) </br>
+    } </br>
+ </div>
+</em>
+
+- fieldname — ключ поля у формі (multipart/form-data), яке містить файл.
+- originalname — початкове ім’я файла, яке надіслав клієнт.
+- encoding — спосіб кодування під час передавання (зазвичай 7bit).
+- mimetype — визначений тип вмісту (наприклад, image/png, image/jpeg).
+- size — фактичний розмір отриманого файлу.
+- buffer — повний вміст файлу у вигляді Buffer (саме його передаватимемо далі у хмарне сховище).
+
+## Інші методи Multer
+
+<strong>array(fieldname, maxCount)</strong> — дозволяє завантажувати кілька файлів під одним ім’ям поля:
+
+<em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    app.post('/students', upload.array('photos', 10), (req, res, next) => { </br>
+    // req.files — масив файлів </br>
+    }); </br>
+</div>
+</em>
+
+- <strong>fields(fields)</strong> — дозволяє завантажувати файли з кількох різних полів:
+
+<em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    app.post('/students', upload.fields([ </br>
+    { name: 'avatar', maxCount: 1 }, </br>
+    { name: 'gallery', maxCount: 8 } </br>
+    ]), (req, res, next) => { </br>
+    // req.files.avatar, req.files.gallery </br>
+    }); </br>
+</div>
+</em>
+ </br>
+</details>
+</li>
+<li>
+<details>
+<summary>Хмарне сховище Cloudinary</summary>
+
+# Хмарне сховище Cloudinary
+
+<strong>Cloudinary</strong> — це хмарний сервіс для керування зображеннями та відео. Він дозволяє зберігати, обробляти, оптимізувати та доставляти медіафайли. Cloudinary забезпечує можливості завантаження, масштабування, перетворення формату, покращення якості та інтеграцію з іншими вебсервісами для ефективного використання медіаконтенту у веб- та мобільних додатках.
+
+Ми будемо використовувати Cloudinary для завантаження, зберігання та отримання безпечних URL-адрес для медіафайлів.
+
+## Реєстрація
+
+Для початку потрібно зареєструватися у Cloudinary.
+
+Додамо cloudinary у залежності нашого додатка
+
+- <em style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">npm install cloudinary</em>
+
+## Змінні оточення
+
+Збережемо ключі доступу у файлі .env:
+
+<em>
+<div style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+    # .env </br>
+     </br>
+    # Решта змінних </br>
+     </br>
+    # Cloudinary </br>
+     </br>
+    CLOUDINARY*CLOUD_NAME=ваше*значення </br>
+    CLOUDINARY*API_KEY=ваше*значення </br>
+    CLOUDINARY*API_SECRET=ваше*значення </br>
+</div>
+</em>
+
+## Утиліта для завантаження файлів
+
+Створимо функцію saveFileToCloudinary, яка отримає файл і завантажить його у Cloudinary:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/utils/saveFileToCloudinary.js </br>
+       </br>
+      import { Readable } from 'node:stream'; </br>
+      import { v2 as cloudinary } from 'cloudinary'; </br>
+   </summary>
+     </br>
+    cloudinary.config({ </br>
+    secure: true, </br>
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, </br>
+    api_key: process.env.CLOUDINARY_API_KEY, </br>
+    api_secret: process.env.CLOUDINARY_API_SECRET, </br>
+    }); </br>
+     </br>
+    export async function saveFileToCloudinary(buffer) { </br>
+    return new Promise((resolve, reject) => { </br>
+    const uploadStream = cloudinary.uploader.upload_stream( </br>
+    { </br>
+    folder: 'students-app/avatars', </br>
+    resource_type: 'image', </br>
+    overwrite: true, </br>
+    unique_filename: true, </br>
+    use_filename: false, </br>
+    }, </br>
+    (err, result) => (err ? reject(err) : resolve(result)), </br>
+    ); </br>
+     </br>
+        Readable.from(buffer).pipe(uploadStream); </br>
+     </br>
+    }); </br>
+    } </br>
+ </details>
+</em>
+ </br>
+Як працює ця функція:
+
+- Конфігурація Cloudinary: виконується через cloudinary.config(), де ми вказуємо ключі з .env.
+- upload_stream: створюється стрім для завантаження, куди можна передати вміст файлу.
+- Readable.from(buffer): перетворює Buffer з пам’яті у потік, який відправляється у Cloudinary.
+- Promise: функція обгорнута у проміс, щоб можна було зручно використовувати await. Якщо завантаження успішне — повертається результат з усією інформацією про файл (наприклад, secure_url), якщо помилка — вона передається у reject.
+
+Пояснення щодо нових концепцій
+
+1. Виклик <strong>Readable.from(buffer)</strong> створює читальний потік (Readable stream) із буфера пам’яті — тобто робить із buffer джерело даних, яке можна “читати” поступово.
+
+Файл у buffer зберігається як суцільний масив байтів, але Cloudinary очікує отримати дані через потік, а не одним великим шматком.
+
+Readable потік у Node.js — це абстракція над джерелом даних, яке віддає дані порціями (чанками).
+
+У цьому випадку він:
+
+- бере ваш буфер;
+- ділить його на чанки;
+- “штовхає” ці чанки далі по трубі (pipe).
+  Отже, Readable.from(buffer) перетворює статичний вміст у потік, який можна передавати іншим системам, що працюють зі стрімами.
+
+2. Метод <strong>cloudinary.uploader.upload_stream(...)</strong> створює записувальний потік (Writable stream).
+
+Writable потік — це приймач, який:
+
+- отримує дані (байти зображення);
+- відправляє їх у Cloudinary API;
+- сигналізує, коли прийом завершено або сталася помилка.
+  Тобто upload_stream — це такий “вхідний порт” у Cloudinary, який чекає, що ви в нього “наллєте” байти зображення.
+
+3. Оператор <strong>.pipe()</strong> з’єднує читальний потік (Readable) із записувальним (Writable).
+
+Відтепер дані автоматично передаються:
+
+Readable (з buffer) → Writable (у Cloudinary)
+
+Це аналог «трубки», через яку інформація перетікає з одного потоку в інший.
+
+Давайте підсумуємо. Cloudinary не може напряму прийняти buffer, бо він очікує стрім байтів, а не готовий файл.
+
+Потоки (Readable → Writable) дають змогу:
+
+- передавати дані без створення тимчасових файлів на диску;
+- обробляти великі файли поступово;
+- відправляти зображення прямо з пам’яті у хмару.
+
+## Оновлення контролера
+
+Оновлюємо метод updateUserAvatar, щоб зберігати новий аватар у Cloudinary і записувати його URL у базу даних:
+
+<em>
+ <details style="background: #383737ff; border-radius: 8px; padding-left: 10px;  padding-right: 10px;">
+   <summary>
+      // src/controllers/userController.js </br>
+       </br>
+      import createHttpError from 'http-errors'; </br>
+      import { User } from '../models/user.js'; </br>
+      import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js'; </br>
+   </summary>
+     </br>
+    export const updateUserAvatar = async (req, res, next) => { </br>
+    if (!req.file) { </br>
+    next(createHttpError(400, 'No file')); </br>
+    return; </br>
+    } </br>
+     </br>
+    const result = await saveFileToCloudinary(req.file.buffer); </br>
+     </br>
+    const user = await User.findByIdAndUpdate( </br>
+    req.user.\_id, </br>
+    { avatar: result.secure_url }, </br>
+    { new: true }, </br>
+    ); </br>
+     </br>
+    res.status(200).json({ url: user.avatar }); </br>
+    }; </br>
+ </details>
+</em>
+ </br>
+У цьому контролері ми робимо кілька кроків:
+
+- Перевірка наявності файлу. Якщо користувач не передав файл — повертаємо помилку 400 Bad Request.
+- Виклик saveFileToCloudinary. Функція завантажує зображення у Cloudinary і повертає об’єкт із даними про файл. У ньому є, зокрема:
+- secure_url — безпечне посилання на зображення, яке можна використовувати на фронтенді.
+- public_id — унікальний ідентифікатор файлу у Cloudinary.
+- format, resource_type, bytes та інші службові поля.
+- Оновлення користувача. Ми шукаємо користувача за його \_id (береться з req.user.\_id, встановленого в процесі аутентифікації). Далі виконуємо findByIdAndUpdate, щоб записати нову адресу аватара у властивість avatar.
+- Опція { new: true }. Вона гарантує, що у змінну user потрапить уже оновлений об’єкт користувача.
+- Фінальна відповідь. У відповідь клієнт отримує JSON з ключем url, де лежить новий аватар користувача.
+
+Таким чином, після завантаження зображення у Cloudinary, користувач одразу бачить оновлений аватар у своєму профілі.
+
+</details>
+</li>
+</ul>
+</details>

@@ -12,6 +12,7 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import studentsRoutes from './routes/studentsRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -24,6 +25,7 @@ app.use(cors()); // 3. Дозвіл для запитів з інших доме
 app.use(cookieParser());
 
 app.use(authRoutes);
+app.use(userRoutes);
 
 // підключаємо групу маршрутів студента
 app.use(studentsRoutes);
